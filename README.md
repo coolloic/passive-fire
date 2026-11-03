@@ -5,12 +5,16 @@
 
 A mobile-first, offline-capable web app for **construction team leaders** on the QAntum passive fire compliance platform. Before going on site, a team leader checks that the products needed for planned fire stopping work are in stock, and escalates shortages so the business can nominate a different solution or reschedule the work.
 
-> **Status:** slice 1 (readiness check and escalation) is built and tested locally and in CI. It is **not deployed yet**: the cloud deploy job is ready but switched off until a Supabase cloud project and Vercel project exist (see [Deployment](#deployment)).
+> **Status:** slice 1 (readiness check and escalation) is built, tested locally and in CI, and **live at https://passive-fire-roan.vercel.app** (Vercel + Supabase cloud, SAMPLE data). The production deploy was made with the Vercel CLI; the gated GitHub Actions deploy job is ready but not yet switched on (see [Deployment](#deployment)).
+
+**Try it:** open the [live demo](https://passive-fire-roan.vercel.app), choose **Continue as Team Leader (SAMPLE)** or **Continue as Project Manager (SAMPLE)**, and follow the [demo scenario](#demo-scenario). No password is needed.
 
 ## Table of Contents
 
 - [Background](#background)
+- [Business Analysis](#business-analysis)
 - [Features](#features)
+- [Screenshots](#screenshots)
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
 - [Usage](#usage)
@@ -35,18 +39,52 @@ QAntum captures the "golden thread" of building information for passive fire pro
 
 This repository is the team leader web experience. The full brief is in [`docs/requirements.pdf`](docs/requirements.pdf). The Flutter mobile app is **out of scope** for this repo.
 
+## Business Analysis
+
+The assignment is approached as a software engineering exercise: convert the business requirement into a technical solution, step by step, and show each step. The analysis board walks through that conversion in order:
+
+1. **Problem summary**
+2. **Use cases**: who does what
+3. **Context diagram (DFD level 0)**: scope and boundary
+4. **Activity diagram and state models**: the business process
+5. **Data flow diagram (level 1)**: how data moves
+6. **Domain model** (UML class diagram)
+7. **Entity relationship diagram**: the actual Supabase schema
+8. **Sequence diagram**: check readiness and escalate
+9. **Delivery tickets**: stages from foundations to non-functional follow-ups
+
+It also includes responsive screenshots (online and offline), a delivery summary of what was done by the human and by the AI agent, and the known gaps.
+
+- **View it:** [read-only Excalidraw link](https://excalidraw.com/#json=cTa7c9XWQ5uksL811b40M,z01XArrUocZibZivHormiA) (a snapshot; the summary is at the top)
+- **Edit it:** [`docs/diagrams/ba-analysis.excalidraw`](docs/diagrams/ba-analysis.excalidraw). Open [excalidraw.com](https://excalidraw.com), then **Menu → Open** and choose the file.
+
+Service and platform boundaries (QAntum platform, supplier catalogue, stock, this new capability) are based on the brief and the supplied CSV, and may not match the real platform.
+
 ## Features
 
-What the scaffold includes today:
+Slice 1, readiness check and escalation (see [`docs/spec/slice-1.md`](docs/spec/slice-1.md)):
 
-- **Installable PWA.** Web manifest, maskable icons and a Serwist service worker. The app shell is precached and pages fall back to `/offline` when there is no connection.
-- **Connectivity awareness.** A shared `useOnlineStatus` hook and an accessible offline banner.
-- **Supabase access layer.** Typed browser and server clients behind `src/lib/supabase/`. Both use the anon key, so Row Level Security applies.
-- **Fail-fast configuration.** Zod-validated environment variables. Errors name the missing variable, never its value.
-- **Quality gates.** ESLint, Prettier, strict TypeScript, Vitest with a 90% coverage threshold, Playwright on mobile and desktop viewports, Husky pre-commit hooks and commitlint.
-- **CI/CD.** GitHub Actions runs every check, then deploys to Vercel (preview for PRs, production for `main`).
+- **Readiness of planned work.** The team leader sees their crews' planned work for the next 14 days, each **Ready**, **Short** or **Unknown**, with human-readable reasons. Stock and expected deliveries are allocated by date, earliest planned work first, across all crews ([ADR 0002](docs/adr/0002-cross-crew-allocation-via-demand-function.md)).
+- **Escalation.** A team leader escalates a shortage to a project manager, with the shortage pre-filled and an optional note. Only one escalation can be Open per planned work.
+- **Project manager inbox.** The inbox lists Open escalations first. The project manager resolves each one as stock arriving, a different solution nominated, or planned work rescheduled. Both sides can add notes.
+- **Offline-first PWA.** The app is installable. The planned work list and the next 14 days' details work offline after one visit ([ADR 0003](docs/adr/0003-offline-viewing-by-caching-planned-work-pages.md)). Escalations raised offline are queued on the device and sent when the app is next online.
+- **Optional read-only AI assistant.** It answers questions about readiness and drafts escalation notes, but never changes data. It has a switch (`AI_ENABLED`) and an hourly limit, and is switched off on the live demo.
+- **Demo sign-in.** There are two SAMPLE personas, a team leader and a project manager, backed by real Supabase Auth sessions. Role-based routing and Row Level Security enforce access.
+- **Quality gates.** ESLint, Prettier, strict TypeScript, Vitest with a 90% coverage threshold, integration tests for the database and access rules, Playwright on mobile and desktop, and Husky and commitlint hooks.
 
-Planned for the first slice (see [Roadmap](#roadmap)): a readiness check for planned work, with shortage escalation.
+Not covered in this slice: dedicated UX/UI design work, and most non-functional requirements beyond the basics (observability, real authentication, rate limiting and throttling across all routes, a BFF or proxy, scalability, and a full content security policy). See [Known Limitations](#known-limitations).
+
+## Screenshots
+
+Taken from a production build with SAMPLE data.
+
+| Planned work (mobile)                                                                                               | Detail with reasons (mobile)                                                                                                                | Offline list (mobile)                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| <img src="docs/screenshots/m-2-list.jpg" width="220" alt="Planned work list on mobile with Ready and Short badges"> | <img src="docs/screenshots/m-3-detail.jpg" width="220" alt="Planned work detail on mobile showing a Short scenario and an Escalate button"> | <img src="docs/screenshots/m-5-offline-list.jpg" width="220" alt="Planned work list offline with the offline banner"> |
+
+| Escalate offline (mobile)                                                                                                         | Project manager inbox (desktop)                                                                          | Resolve an escalation (desktop)                                                                                        |
+| --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| <img src="docs/screenshots/m-6-offline-detail.jpg" width="220" alt="Offline planned work detail with an Escalate offline button"> | <img src="docs/screenshots/d-3-inbox.jpg" width="320" alt="Project manager escalation inbox on desktop"> | <img src="docs/screenshots/d-4-inbox-detail.jpg" width="320" alt="Project manager resolving an escalation on desktop"> |
 
 ## Tech Stack
 
@@ -88,7 +126,7 @@ Supabase (Postgres, Auth and the REST API) runs locally in Docker through the pi
 
 ```bash
 pnpm db:start         # first run pulls Docker images and takes a few minutes
-pnpm db:reset         # apply migrations in supabase/migrations and load supabase/seed.sql
+pnpm db:reset         # apply migrations in supabase/migrations and load supabase/seed/*.sql
 pnpm db:status        # show local URLs (Studio: http://localhost:54323)
 pnpm db:stop          # stop the containers
 ```
@@ -143,7 +181,13 @@ Run `pnpm db:reset` (fresh SAMPLE data, dates relative to today), then `pnpm bui
 
 - **Unit tests** sit next to their source as `*.test.ts(x)`. Network calls are mocked with MSW (`src/test/msw/`). Unhandled requests fail the test.
 - **Integration tests** are `*.int.test.ts` files, run with `pnpm test:int` against local Supabase (`pnpm db:start` first). They check the database and its access rules for real.
-- **E2E tests** live in `e2e/*.spec.ts`. They run against a production build on port 3100, on both a mobile (Pixel 7) and a desktop viewport. The suite covers the app shell, layout overflow, the manifest, the offline indicator, offline reload and the offline fallback.
+- **E2E tests** live in `e2e/*.spec.ts`. They run against a production build on port 3100, on both a mobile (Pixel 7) and a desktop viewport. The suite covers the following:
+  - sign-in and role routing
+  - the planned work list and detail
+  - escalation and the project manager inbox
+  - offline viewing and queued escalations
+  - navigation, the PWA manifest, accessibility scans, and a performance check
+  - the assistant's disabled states
 - First run only: install the browser with `pnpm exec playwright install chromium`.
 - To test against an already running or deployed server, set `PLAYWRIGHT_BASE_URL`.
 
@@ -158,8 +202,11 @@ pnpm test:e2e
 .
 ├── .github/workflows/ci.yml   # CI: quality → e2e → Vercel deploy
 ├── .husky/                    # pre-commit (lint-staged + typecheck), commit-msg (commitlint)
-├── docs/                      # Brief, Ryanfire catalogue, delivery plan
-│   └── adr/                   # Architecture Decision Records
+├── docs/                      # Brief, catalogue, iteration/delivery plans, design, test strategy
+│   ├── adr/                   # Architecture Decision Records
+│   ├── diagrams/              # Business analysis board (Excalidraw)
+│   ├── screenshots/           # README screenshots
+│   └── spec/                  # Slice specifications
 ├── e2e/                       # Playwright specs
 ├── public/icons/              # PWA icons (placeholder artwork)
 ├── GLOSSARY.md                # Domain language
@@ -181,13 +228,19 @@ Coding conventions, architecture rules and agent guidance are in [`CLAUDE.md`](C
 
 ## Documentation
 
-| Document                                         | Purpose                                                                |
-| ------------------------------------------------ | ---------------------------------------------------------------------- |
-| [`docs/requirements.pdf`](docs/requirements.pdf) | The business brief                                                     |
-| [`GLOSSARY.md`](GLOSSARY.md)                     | Domain language: one agreed term per concept, with the terms to avoid  |
-| [`docs/adr/`](docs/adr/)                         | Architecture Decision Records: why hard-to-reverse decisions were made |
-| [`docs/delivery-plan.md`](docs/delivery-plan.md) | Milestones and tasks for slice 1, linked to GitHub issues              |
-| [`CLAUDE.md`](CLAUDE.md)                         | Engineering rules and the agentic development workflow                 |
+| Document                                                                       | Purpose                                                                   |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| [`docs/requirements.pdf`](docs/requirements.pdf)                               | The business brief                                                        |
+| [`docs/diagrams/ba-analysis.excalidraw`](docs/diagrams/ba-analysis.excalidraw) | Business analysis board: requirement → diagrams → tickets, plus a summary |
+| [`GLOSSARY.md`](GLOSSARY.md)                                                   | Domain language: one agreed term per concept, with the terms to avoid     |
+| [`docs/iteration-plan.md`](docs/iteration-plan.md)                             | Iterations, the value of each, and why slice 1 comes first                |
+| [`docs/spec/slice-1.md`](docs/spec/slice-1.md)                                 | Slice 1 requirements, acceptance criteria, assumptions and exclusions     |
+| [`docs/technical-design.md`](docs/technical-design.md)                         | UX flows, data model, interfaces and trade-offs                           |
+| [`docs/test-strategy.md`](docs/test-strategy.md)                               | What is tested at each level, and why                                     |
+| [`docs/adr/`](docs/adr/)                                                       | Architecture Decision Records: why hard-to-reverse decisions were made    |
+| [`docs/delivery-plan.md`](docs/delivery-plan.md)                               | Milestones and tasks for slice 1, linked to GitHub issues                 |
+| [`CLAUDE.md`](CLAUDE.md)                                                       | Engineering rules and the agentic development workflow                    |
+| [`.mcp.json`](.mcp.json) and [`.claude/skills/`](.claude/skills/)              | Project MCP servers (Playwright, Vercel, Supabase) and agent skills       |
 
 ### Why a glossary?
 
@@ -205,7 +258,14 @@ Code shows _what_ was built, not _why_. An Architecture Decision Record is a sho
 
 ## Deployment
 
-> **Not deployed yet.** CI runs every check on every PR; the deploy job is skipped until the one-time setup below is done and `DEPLOY_ENABLED` is `true`.
+> **Live:** https://passive-fire-roan.vercel.app, from `main` at `4609f6e`. The production deploy was made manually with the Vercel CLI. The gated GitHub Actions deploy job below is still switched off (`DEPLOY_ENABLED` is not set), so pushes to `main` do not redeploy yet.
+
+| Resource         | Value                                                                                                                 |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Vercel project   | `passive-fire` (team `wong1982-ops-projects`), Node 22, functions in Sydney (`syd1`)                                  |
+| Supabase project | `passive-fire` (`oekfeouqupzfvfgxxicq`), Sydney (`ap-southeast-2`), migrations and SAMPLE seed applied                |
+| Environment      | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (secret), `AI_ENABLED=false` |
+| Git auto-deploy  | Off. Only the CLI (today) or GitHub Actions (once enabled) deploy                                                     |
 
 Pushes and pull requests run [`.github/workflows/ci.yml`](.github/workflows/ci.yml):
 
@@ -214,13 +274,13 @@ Pushes and pull requests run [`.github/workflows/ci.yml`](.github/workflows/ci.y
 3. **deploy**: runs only after both checks pass. It uses the Vercel CLI to build and deploy, creating a **preview** for same-repo PRs and a **production** deploy for `main`. The deployment URL is recorded on the GitHub environment.
 4. **Approval gate**: both the `preview` and `production` GitHub Environments require a reviewer to approve before the deploy runs. `production` also only accepts deploys from `main`. Approve a deploy from the paused run's **Review deployments** button.
 
-One-time setup:
+One-time setup (steps 1, 2 and 4 are done; 3 and 5 remain):
 
-1. Create a Supabase cloud project, apply the migrations in `supabase/migrations/` and load the SAMPLE seed.
-2. Create a Vercel project for this repo (`vercel link`). Add `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` to its Preview and Production environments, plus `AI_ENABLED` and `ANTHROPIC_API_KEY` if the assistant should run.
+1. ✅ Create a Supabase cloud project, apply the migrations in `supabase/migrations/` and load the SAMPLE seed.
+2. ✅ Create a Vercel project for this repo (`vercel link`). Add `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` to its Production environment (and Preview for PR previews), plus `AI_ENABLED` and `ANTHROPIC_API_KEY` if the assistant should run. Add the service role key yourself with `vercel env add … --type secret`, so it never appears in chat or shell history.
 3. Add these repository secrets in GitHub: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`. The IDs are in `.vercel/project.json` after linking.
-4. Turn off Vercel's own Git auto-deploy so GitHub Actions is the only deploy path.
-5. Set the repository variable `DEPLOY_ENABLED` to `true`, then approve the first deploy.
+4. ✅ Leave Vercel's own Git auto-deploy off, so GitHub Actions is the only automatic deploy path.
+5. Set the repository variable `DEPLOY_ENABLED` to `true`, then re-run the latest `main` CI run (or push to `main`) and approve the production deploy.
 
 ## Sample Data
 
@@ -256,11 +316,14 @@ Demo personas: **Sam Taylor (SAMPLE)**, team leader for both crews, and **Priya 
 - There is no "new version available" prompt yet. A waiting service worker activates the next time all tabs are closed.
 - The icons are placeholder artwork.
 
+- **Scope.** Dedicated UX/UI design and most non-functional requirements were not part of this slice. Service and platform boundaries are based on the brief and the supplied CSV, and may not match the real QAntum platform.
+
 ### Gaps before production
 
-- **Not deployed.** No public URL yet (see [Deployment](#deployment)).
+- **Gated CI deploy not switched on.** The live demo was deployed manually; enable the GitHub Actions deploy (see [Deployment](#deployment)) so every deploy is checked and approved.
+- **Security headers.** Responses send HSTS but no anti-framing (`X-Frame-Options` / CSP `frame-ancestors`), `nosniff` or `Referrer-Policy` headers yet, and there is no full content security policy.
 - **Open demo sign-in.** On a public URL anyone can sign in as the SAMPLE personas. Fine for SAMPLE data; real users need real sign-in (QAntum's identity provider) and per-user crews.
-- **Assistant cost and evaluation.** On a public URL every visitor shares the demo persona's hourly limit and the API key's cost; it needs a spending cap or `AI_ENABLED=false`, and the manual real-model evaluation in the [test strategy](docs/test-strategy.md).
+- **Assistant cost and evaluation.** The live demo runs with `AI_ENABLED=false`. Before switching it on publicly, add a spending cap, because every visitor shares the demo persona's hourly limit and the API key's cost, and do the manual real-model evaluation in the [test strategy](docs/test-strategy.md).
 - **Monitoring.** Errors go to the console through `src/lib/logger.ts`; production needs a hosted sink (e.g. Sentry) behind the same interface, and uptime alerts.
 - **Device coverage.** iOS Safari's service worker behaviour is checked manually, not in CI.
 - **Time zones and updates.** "Today" is UTC, and there is no "new version available" prompt (above).
