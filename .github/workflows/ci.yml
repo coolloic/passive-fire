@@ -49,8 +49,15 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
       - name: Start local Supabase
         # Only the database, auth, REST API and gateway are needed; fewer containers means fewer
-        # host ports to bind (runners have failed with "address already in use") and a faster start.
-        run: pnpm db:start:ci
+        # host ports to bind and a faster start. Docker on the runner sometimes reports a port as
+        # "address already in use" (even 54322 on a fresh runner); stop cleanly and retry once.
+        run: |
+          pnpm db:start:ci || {
+            echo "::warning::supabase start failed; stopping and retrying once"
+            pnpm exec supabase stop --no-backup
+            sleep 5
+            pnpm db:start:ci
+          }
       - name: Export local Supabase connection settings
         run: |
           pnpm exec supabase status -o env \
@@ -82,8 +89,15 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Start local Supabase
         # Only the database, auth, REST API and gateway are needed; fewer containers means fewer
-        # host ports to bind (runners have failed with "address already in use") and a faster start.
-        run: pnpm db:start:ci
+        # host ports to bind and a faster start. Docker on the runner sometimes reports a port as
+        # "address already in use" (even 54322 on a fresh runner); stop cleanly and retry once.
+        run: |
+          pnpm db:start:ci || {
+            echo "::warning::supabase start failed; stopping and retrying once"
+            pnpm exec supabase stop --no-backup
+            sleep 5
+            pnpm db:start:ci
+          }
       - name: Export local Supabase connection settings
         run: |
           pnpm exec supabase status -o env \
