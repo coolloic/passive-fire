@@ -21,6 +21,7 @@ export default defineConfig({
         "src/app/manifest.ts",
         "src/app/sw.ts",
         "src/test/**",
+        "src/lib/supabase/database.types.ts",
       ],
       thresholds: { lines: 90, branches: 90, functions: 90, statements: 90 },
     },
