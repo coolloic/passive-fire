@@ -26,14 +26,14 @@ describe("DemoSignIn", () => {
 
   it("clears pages saved for a previous user before signing in", async () => {
     const calls: string[] = [];
-    const clearCaches = vi.fn(async () => {
+    const clearDeviceData = vi.fn(async () => {
       calls.push("clear");
     });
     const action = vi.fn(async () => {
       calls.push("sign in");
       return { message: null };
     });
-    render(<DemoSignIn action={action} clearCaches={clearCaches} />);
+    render(<DemoSignIn action={action} clearDeviceData={clearDeviceData} />);
     await userEvent.click(screen.getByRole("button", TEAM_LEADER));
     expect(calls).toEqual(["clear", "sign in"]);
   });

@@ -2,21 +2,21 @@
 
 import { useState } from "react";
 import { Button } from "@/components/atoms/Button";
-import { clearPrivateCaches } from "@/lib/offline/cache";
+import { clearPrivateData } from "@/lib/privacy/clear-private-data";
 
 interface SignOutButtonProps {
   action: () => Promise<void>;
   /** Injected for tests. */
-  clearCaches?: () => Promise<void>;
+  clearDeviceData?: () => Promise<void>;
 }
 
-/** Signs out after removing pages saved for offline use from this device (ADR 0003). */
-export function SignOutButton({ action, clearCaches = clearPrivateCaches }: SignOutButtonProps) {
+/** Signs out after removing private data from this device: saved pages and the assistant conversation. */
+export function SignOutButton({ action, clearDeviceData = clearPrivateData }: SignOutButtonProps) {
   const [pending, setPending] = useState(false);
 
   async function signOut() {
     setPending(true);
-    await clearCaches();
+    await clearDeviceData();
     await action();
   }
 
