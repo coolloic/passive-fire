@@ -53,15 +53,52 @@ describe("DemoSignIn", () => {
     expect(screen.getByRole("button", TEAM_LEADER)).toBeEnabled();
   });
 
-  it("disables both buttons and announces progress while signing in", async () => {
-    let finish: (state: DemoSignInState) => void = () => {};
-    const action = vi.fn(() => new Promise<DemoSignInState>((resolve) => (finish = resolve)));
+  it("disables both buttons and announces the chosen persona while signing in", async () => {
+    const action = vi.fn(() => new Promise<DemoSignInState>(() => {}));
     render(<DemoSignIn action={action} />);
-    await userEvent.click(screen.getByRole("button", TEAM_LEADER));
+    await userEvent.click(screen.getByRole("button", PROJECT_MANAGER));
     expect(screen.getByRole("button", TEAM_LEADER)).toBeDisabled();
     expect(screen.getByRole("button", PROJECT_MANAGER)).toBeDisabled();
-    expect(screen.getByText("Signing in…")).toBeInTheDocument();
-    finish({ message: null });
-    await waitFor(() => expect(screen.getByRole("button", TEAM_LEADER)).toBeEnabled());
+    expect(screen.getByRole("button", PROJECT_MANAGER)).toHaveAttribute("aria-busy", "true");
+    expect(screen.getByRole("button", TEAM_LEADER)).not.toHaveAttribute("aria-busy");
+    expect(screen.getByText("Signing in as Project Manager (SAMPLE)…")).toBeInTheDocument();
+  });
+
+  // Regression: a successful server action redirects and resolves with no state. That must not
+  // be shown as a failure, and the buttons must stay in the signing-in state until navigation.
+  it.each([
+    ["no result (redirect)", undefined],
+    ["a result without a message", { message: null }],
+  ])("stays optimistic when the action resolves with %s", async (_label, result) => {
+    const action = vi.fn(async () => result as unknown as DemoSignInState);
+    render(<DemoSignIn action={action} />);
+    await userEvent.click(screen.getByRole("button", TEAM_LEADER));
+    await waitFor(() => expect(action).toHaveBeenCalled());
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", TEAM_LEADER)).toBeDisabled();
+    expect(screen.getByText("Signing in as Team Leader (SAMPLE)…")).toBeInTheDocument();
+  });
+
+  it("rolls back the optimistic state when the action returns a message", async () => {
+    const action = vi.fn(async () => ({ message: "Sign-in is unavailable right now." }));
+    render(<DemoSignIn action={action} />);
+    await userEvent.click(screen.getByRole("button", TEAM_LEADER));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Sign-in is unavailable");
+    expect(screen.getByRole("button", TEAM_LEADER)).toBeEnabled();
+    expect(screen.getByRole("button", TEAM_LEADER)).not.toHaveAttribute("aria-busy");
+    expect(screen.queryByText(/Signing in as/)).not.toBeInTheDocument();
+  });
+
+  it("clears an earlier error as soon as the person tries again", async () => {
+    const action = vi
+      .fn<(role: string) => Promise<DemoSignInState>>()
+      .mockResolvedValueOnce({ message: "Sign-in is unavailable right now." })
+      .mockImplementationOnce(() => new Promise<DemoSignInState>(() => {}));
+    render(<DemoSignIn action={action} />);
+    await userEvent.click(screen.getByRole("button", TEAM_LEADER));
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", TEAM_LEADER));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByText("Signing in as Team Leader (SAMPLE)…")).toBeInTheDocument();
   });
 });
