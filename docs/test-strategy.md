@@ -30,23 +30,23 @@ Covers [`spec/slice-1.md`](spec/slice-1.md) as designed in [`technical-design.md
 
 U = unit, I = integration, E = end-to-end, M = manual.
 
-| Requirement               | Acceptance criteria |  U  |  I  |  E  | Notes                                                                                                                                                     |
-| ------------------------- | ------------------- | :-: | :-: | :-: | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| FR-1 Sign-in              | AC-1.1 – 1.4        |  ✓  |  ✓  |  ✓  | Middleware and role guards unit-tested; refusal of the wrong role checked by integration; both personas end to end.                                       |
-| FR-2 Catalogue import     | AC-2.1 – 2.4        |  ✓  |  ✓  |     | Parser per size format (U); 148 rows, leading zeros and determinism after `db:reset` (I).                                                                 |
-| FR-3 Allocation           | AC-3.1 – 3.6        |  ✓  |  ✓  |     | Matrix in §4 (U); `allocation_demand` output (I).                                                                                                         |
-| FR-4 Readiness            | AC-4.1 – 4.6        |  ✓  |     |  ✓  | Matrix in §4 (U); each state visible in the UI from the seed (E).                                                                                         |
-| FR-5 List                 | AC-5.1 – 5.4        |  ✓  |  ✓  |  ✓  | Grouping, empty state, badges (U); own crews only (I); seeded list (E).                                                                                   |
-| FR-6 Detail               | AC-6.1 – 6.4        |  ✓  |  ✓  |  ✓  | Reasons rendering and button rules (U); other leader's work returns nothing (I); not-found page (E).                                                      |
-| FR-7 Raise                | AC-7.1 – 7.6        |  ✓  |  ✓  |  ✓  | Form validation and errors (U); one-open index and recomputed shortage (I); raise, duplicate block and note (E).                                          |
-| FR-8 Resolve              | AC-8.1 – 8.5        |  ✓  |  ✓  |  ✓  | Ordering and required resolution (U); team leader cannot update (I); full loop across personas (E).                                                       |
-| FR-9 Offline viewing      | AC-9.1 – 9.5        |  ✓  |     |  ✓  | Snapshot store and 24-hour warning with fake timers (U); offline reload of list and detail (E).                                                           |
-| FR-10 Offline escalations | AC-10.1 – 10.5      |  ✓  |  ✓  |  ✓  | Outbox replay, retry and removal rules (U); `on conflict` idempotency and cleared-shortage flag (I); escalate offline, reconnect, exactly one record (E). |
-| FR-11 Assistant questions | AC-11.1 – 11.5      |  ✓  |  ✓  |  ✓  | Route with stubbed model and tool calls (U); tools return only the user's data (I); drawer opens, offline state (E); answer quality (M).                  |
-| FR-12 Draft escalation    | AC-12.1 – 12.3      |  ✓  |     |  ✓  | Draft fills the note and is editable (U); form works with the assistant disabled (E).                                                                     |
-| FR-13 Safeguards          | AC-13.1 – 13.3      |  ✓  |  ✓  |  ✓  | Length cap and error mapping (U); 20-per-hour counter (I); disabled and offline states (E).                                                               |
-| FR-14 Sample data         | AC-14.1 – 14.4      |  ✓  |  ✓  |  ✓  | Generator rules (U); seed contents and SAMPLE flags (I); SAMPLE labels in the UI (E).                                                                     |
-| Non-functional            | §5 of the spec      |     |  ✓  |  ✓  | Access rules (I); viewports, touch targets, axe accessibility scan, Lighthouse on the list page (E/M).                                                    |
+| Requirement               | Acceptance criteria |  U  |  I  |  E  | Notes                                                                                                                                                                                              |
+| ------------------------- | ------------------- | :-: | :-: | :-: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FR-1 Sign-in              | AC-1.1 – 1.4        |  ✓  |  ✓  |  ✓  | Middleware and role guards unit-tested; refusal of the wrong role checked by integration; both personas end to end.                                                                                |
+| FR-2 Catalogue import     | AC-2.1 – 2.4        |  ✓  |  ✓  |     | Parser per size format (U); 148 rows, leading zeros and determinism after `db:reset` (I).                                                                                                          |
+| FR-3 Allocation           | AC-3.1 – 3.6        |  ✓  |  ✓  |     | Matrix in §4 (U); `allocation_demand` output (I).                                                                                                                                                  |
+| FR-4 Readiness            | AC-4.1 – 4.6        |  ✓  |     |  ✓  | Matrix in §4 (U); each state visible in the UI from the seed (E).                                                                                                                                  |
+| FR-5 List                 | AC-5.1 – 5.4        |  ✓  |  ✓  |  ✓  | Grouping, empty state, badges (U); own crews only (I); seeded list (E).                                                                                                                            |
+| FR-6 Detail               | AC-6.1 – 6.4        |  ✓  |  ✓  |  ✓  | Reasons rendering and button rules (U); other leader's work returns nothing (I); not-found page (E).                                                                                               |
+| FR-7 Raise                | AC-7.1 – 7.6        |  ✓  |  ✓  |  ✓  | Form validation and errors (U); one-open index and recomputed shortage (I); raise, duplicate block and note (E).                                                                                   |
+| FR-8 Resolve              | AC-8.1 – 8.5        |  ✓  |  ✓  |  ✓  | Ordering and required resolution (U); team leader cannot update (I); full loop across personas (E).                                                                                                |
+| FR-9 Offline viewing      | AC-9.1 – 9.5        |  ✓  |     |  ✓  | Offline page rules and the 24-hour warning with fake timers (U); offline reload of list and detail, including pages never opened (E).                                                              |
+| FR-10 Offline escalations | AC-10.1 – 10.5      |  ✓  |  ✓  |  ✓  | Outbox replay, retry and removal rules (U); `on conflict` idempotency and cleared-shortage flag (I); escalate offline, reconnect, exactly one record (E).                                          |
+| FR-11 Assistant questions | AC-11.1 – 11.5      |  ✓  |  ✓  |  ✓  | Route with stubbed model and tool calls (U); tools return only the user's data (I); drawer opens, offline state (E); answer quality (M).                                                           |
+| FR-12 Draft escalation    | AC-12.1 – 12.3      |  ✓  |     |  ✓  | Draft fills the note and is editable (U); form works with the assistant disabled (E).                                                                                                              |
+| FR-13 Safeguards          | AC-13.1 – 13.3      |  ✓  |  ✓  |  ✓  | Length cap and error mapping (U); 20-per-hour counter (I); disabled and offline states (E).                                                                                                        |
+| FR-14 Sample data         | AC-14.1 – 14.4      |  ✓  |  ✓  |  ✓  | Generator rules (U); seed contents and SAMPLE flags (I); SAMPLE labels in the UI (E).                                                                                                              |
+| Non-functional            | §5 of the spec      |     |  ✓  |  ✓  | Access rules (I); viewports, touch targets, and an axe WCAG 2.2 AA scan of every screen in light and dark mode (`e2e/accessibility.spec.ts`) (E); Lighthouse mobile on the list page (M, see §7a). |
 
 ## 4. Readiness edge-case matrix
 
@@ -114,6 +114,18 @@ E2E tests run with the assistant disabled or stubbed, never against the real API
 | App shell, list and detail (including details never opened) load offline after one visit; My escalations does not | E2E                |
 | Offline banner and disabled network actions                                                                       | E2E                |
 | Escalate offline, reconnect, exactly one escalation exists                                                        | E2E                |
+
+## 7a. Accessibility and performance
+
+- **Automated:** `e2e/accessibility.spec.ts` runs axe with the WCAG 2.2 AA rules on sign-in, the offline page, every team leader page (including the assistant dialog and the offline list) and the project manager inbox, in light and dark mode, on the mobile and desktop projects. Transitions are switched off during the scan so colours are measured at rest. axe covers the automatable subset of WCAG; keyboard and screen reader checks stay manual.
+- **Manual (Lighthouse 13.5, mobile preset with simulated slow 4G, signed-in Planned Work list, production build, 3 Nov 2026):**
+
+  | Colour scheme | Performance | Accessibility | Best practices | Time to interactive | Largest contentful paint |
+  | ------------- | ----------- | ------------- | -------------- | ------------------- | ------------------------ |
+  | Light         | 99          | 100           | 100            | 2.5 s               | 2.3 s                    |
+  | Dark          | 98          | 100           | 100            | 2.4 s               | 2.4 s                    |
+
+  The first run found a dark-mode contrast failure (4.17:1) in the header that the light-mode axe scan had missed; that is why the axe scan now covers both schemes. Re-run Lighthouse against the deployed URL after the first deploy.
 
 ## 8. CI
 

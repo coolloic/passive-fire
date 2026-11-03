@@ -16,7 +16,7 @@ export function AppShell({ title, userName, actions, nav, children }: AppShellPr
       <header className="border-b border-neutral-200 bg-[var(--background)] px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] md:sticky md:top-0 md:z-20 md:px-8 dark:border-neutral-800">
         <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-sm text-neutral-500">QAntum Team Leader</p>
+            <p className="text-sm text-neutral-600 dark:text-neutral-400">QAntum Team Leader</p>
             <p className="text-base">
               Signed in as <span className="font-medium">{userName}</span>
             </p>
