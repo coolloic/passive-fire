@@ -2,6 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { SAMPLE_PERSONAS, SAMPLE_PLANNED_WORK } from "../src/lib/sample-data/site";
 import { createOpenEscalation, resetEscalations } from "./support/database";
+import { signInWithServiceWorker } from "./support/session";
 
 // Spec NFR: WCAG 2.2 AA. axe finds the automatable subset; keyboard and screen reader checks
 // remain manual (docs/test-strategy.md).
@@ -54,7 +55,7 @@ test("sign-in and the offline page", async ({ page }) => {
 test("team leader pages", async ({ page }) => {
   const escalationId = await createOpenEscalation(plannedWorkId("PW2"), teamLeaderId);
   await signInAs(page, "Team Leader");
-  await expect(page.getByText(/Saved \d+ planned works? for offline use/)).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Planned work" })).toBeVisible();
   await expectNoViolations(page);
 
   for (const path of [
@@ -86,8 +87,8 @@ test("project manager pages", async ({ page }) => {
 });
 
 test("offline states", async ({ page, context }) => {
-  await signInAs(page, "Team Leader");
-  await expect(page.getByText(/Saved \d+ planned works? for offline use/)).toBeVisible();
+  // Offline pages are only saved once the service worker controls the page.
+  await signInWithServiceWorker(page);
   await context.setOffline(true);
   await page.reload();
   await expect(page.getByText(/You're offline/)).toBeVisible();

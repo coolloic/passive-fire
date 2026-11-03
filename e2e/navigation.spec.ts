@@ -16,7 +16,7 @@ test("the main navigation stays in view at the end of a long page", async ({ pag
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   await expect(nav).toBeInViewport();
   // Nothing in the page is hidden behind the bar on phones.
-  await expect(page.getByText(/Saved \d+ planned works? for offline use/)).toBeInViewport();
+  await expect(page.getByRole("main").getByRole("link").last()).toBeInViewport({ ratio: 1 });
 
   await nav.getByRole("link", { name: "My escalations" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "My escalations" })).toBeVisible();
