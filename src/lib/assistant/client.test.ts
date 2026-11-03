@@ -80,6 +80,29 @@ describe("askAssistant", () => {
     ).resolves.toEqual(expected);
   });
 
+  it.each([
+    [{ error: "disabled" }, { kind: "disabled" }],
+    [{ error: "not_configured" }, { kind: "not_configured" }],
+    ["not json", { kind: "not_configured" }],
+    [null, { kind: "not_configured" }],
+  ])("tells a switched-off assistant from an unconfigured one (%j)", async (body, expected) => {
+    const response = new Response(typeof body === "string" ? body : JSON.stringify(body), {
+      status: 503,
+    });
+    await expect(askAssistant(history, vi.fn(), fetcherFor(response))).resolves.toEqual(expected);
+  });
+
+  it.each([
+    [{ error: "rate_limited", retryAt: "2026-11-03T15:00:00Z" }, "2026-11-03T15:00:00Z"],
+    [{ error: "rate_limited" }, null],
+  ])("reports the rate limit with the retry time (%j)", async (body, retryAt) => {
+    const response = new Response(JSON.stringify(body), { status: 429 });
+    await expect(askAssistant(history, vi.fn(), fetcherFor(response))).resolves.toEqual({
+      kind: "rate_limited",
+      retryAt,
+    });
+  });
+
   it("reports an error when the request fails or has no body", async () => {
     await expect(
       askAssistant(history, vi.fn(), fetcherFor(new TypeError("Failed to fetch"))),

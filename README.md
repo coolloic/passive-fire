@@ -108,6 +108,7 @@ Paste the values `pnpm db:env` prints into `.env.local`. This file is git-ignore
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes                | Supabase anon key (data access is RLS-guarded)           |
 | `SUPABASE_SERVICE_ROLE_KEY`     | **No**             | Server-only; used by tests and passwordless demo sign-in |
 | `ANTHROPIC_API_KEY`             | **No**             | Optional; enables the read-only AI assistant             |
+| `AI_ENABLED`                    | **No**             | Set to `false` to switch the assistant off               |
 
 ## Usage
 
