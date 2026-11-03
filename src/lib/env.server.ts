@@ -22,3 +22,16 @@ export function parseServerEnv(
   }
   return result.data;
 }
+
+/** The Anthropic API key, or null when the assistant is not configured on this server. */
+export function getAnthropicApiKey(
+  raw: string | undefined = process.env.ANTHROPIC_API_KEY,
+): string | null {
+  const key = raw?.trim();
+  return key ? key : null;
+}
+
+/** The assistant is on unless AI_ENABLED is explicitly "false" (or "0"/"off"). */
+export function isAssistantEnabled(raw: string | undefined = process.env.AI_ENABLED): boolean {
+  return !["false", "0", "off"].includes((raw ?? "").trim().toLowerCase());
+}

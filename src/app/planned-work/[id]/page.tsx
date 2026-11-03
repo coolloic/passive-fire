@@ -4,6 +4,7 @@ import { ButtonLink } from "@/components/atoms/ButtonLink";
 import { ReadinessBadge } from "@/components/atoms/ReadinessBadge";
 import { DataFreshness } from "@/components/molecules/DataFreshness";
 import { NeedsConnection } from "@/components/molecules/NeedsConnection";
+import { AssistantPanel } from "@/components/organisms/AssistantPanel";
 import { OfflineEscalate } from "@/components/organisms/OfflineEscalate";
 import { OutboxPanel } from "@/components/organisms/OutboxPanel";
 import { ProductReadinessList } from "@/components/organisms/ProductReadinessList";
@@ -55,6 +56,7 @@ export default async function PlannedWorkDetailPage({ params }: PlannedWorkDetai
       </TextLink>
       {detail ? <DataFreshness asOf={asOf} /> : null}
       <OutboxPanel userId={user.id} send={raiseEscalationAction} />
+      {detail ? <AssistantPanel /> : null}
       {detail ? (
         <div className="flex max-w-3xl flex-col gap-6">
           <section

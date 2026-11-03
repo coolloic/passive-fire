@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DataFreshness } from "@/components/molecules/DataFreshness";
+import { AssistantPanel } from "@/components/organisms/AssistantPanel";
 import { OutboxPanel } from "@/components/organisms/OutboxPanel";
 import { SaveForOffline } from "@/components/organisms/SaveForOffline";
 import { SignOutButton } from "@/components/organisms/SignOutButton";
@@ -50,6 +51,7 @@ export default async function PlannedWorkPage() {
         <>
           <DataFreshness asOf={asOf} />
           <OutboxPanel userId={user.id} send={raiseEscalationAction} />
+          <AssistantPanel />
           <PlannedWorkList summaries={summaries} today={today} />
           <SaveForOffline
             hrefs={summaries.map((summary) => `/planned-work/${summary.plannedWorkId}`)}
