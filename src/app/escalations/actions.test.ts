@@ -3,12 +3,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const getCurrentUser = vi.fn();
 const raiseEscalation = vi.fn();
 const addEscalationNote = vi.fn();
+const resolveEscalation = vi.fn();
 const revalidatePath = vi.fn();
 const loggerError = vi.fn();
 
 vi.mock("next/cache", () => ({ revalidatePath }));
 vi.mock("@/lib/auth/session", () => ({ getCurrentUser }));
-vi.mock("@/lib/services/escalations", () => ({ raiseEscalation, addEscalationNote }));
+vi.mock("@/lib/services/escalations", () => ({
+  raiseEscalation,
+  addEscalationNote,
+  resolveEscalation,
+}));
 vi.mock("@/lib/supabase/server-client", () => ({ createServerSupabaseClient: () => ({}) }));
 vi.mock("@/lib/data/readiness-repository", () => ({
   createSupabaseReadinessDataSource: () => "readiness",
@@ -18,7 +23,7 @@ vi.mock("@/lib/data/escalation-repository", () => ({
 }));
 vi.mock("@/lib/logger", () => ({ logger: { error: loggerError } }));
 
-const { addNoteAction, raiseEscalationAction } = await import("./actions");
+const { addNoteAction, raiseEscalationAction, resolveEscalationAction } = await import("./actions");
 const request = { id: "e1", plannedWorkId: "pw", note: "" };
 
 describe("raiseEscalationAction", () => {
@@ -92,6 +97,66 @@ describe("addNoteAction", () => {
   it("logs and reports unexpected errors", async () => {
     getCurrentUser.mockRejectedValue(new Error("auth down"));
     await expect(addNoteAction({ escalationId: "e1", body: "Hi" })).resolves.toEqual({
+      kind: "error",
+    });
+    expect(loggerError).toHaveBeenCalled();
+  });
+});
+
+describe("resolveEscalationAction", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("resolves for a project manager and refreshes both sides", async () => {
+    getCurrentUser.mockResolvedValue({ role: "project_manager" });
+    resolveEscalation.mockResolvedValue({ kind: "resolved" });
+    await expect(
+      resolveEscalationAction({ escalationId: "e1", resolution: "stock_arriving", comment: "" }),
+    ).resolves.toEqual({
+      kind: "resolved",
+    });
+    expect(resolveEscalation).toHaveBeenCalledWith("escalations", {
+      escalationId: "e1",
+      resolution: "stock_arriving",
+      comment: "",
+    });
+    expect(revalidatePath).toHaveBeenCalledWith("/inbox", "layout");
+    expect(revalidatePath).toHaveBeenCalledWith("/escalations", "layout");
+  });
+
+  it("passes a missing resolution through as undefined so validation names it", async () => {
+    getCurrentUser.mockResolvedValue({ role: "project_manager" });
+    resolveEscalation.mockResolvedValue({
+      kind: "invalid",
+      message: "Choose how the shortage was resolved.",
+    });
+    await resolveEscalationAction({ escalationId: "e1", resolution: "", comment: "" });
+    expect(resolveEscalation).toHaveBeenCalledWith("escalations", {
+      escalationId: "e1",
+      resolution: undefined,
+      comment: "",
+    });
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it.each([null, { role: "team_leader" }])(
+    "refuses anyone but a project manager (%j)",
+    async (user) => {
+      getCurrentUser.mockResolvedValue(user);
+      await expect(
+        resolveEscalationAction({ escalationId: "e1", resolution: "stock_arriving", comment: "" }),
+      ).resolves.toEqual({
+        kind: "not_found",
+      });
+      expect(resolveEscalation).not.toHaveBeenCalled();
+    },
+  );
+
+  it("logs and reports unexpected errors", async () => {
+    getCurrentUser.mockResolvedValue({ role: "project_manager" });
+    resolveEscalation.mockRejectedValue(new Error("db"));
+    await expect(
+      resolveEscalationAction({ escalationId: "e1", resolution: "stock_arriving", comment: "" }),
+    ).resolves.toEqual({
       kind: "error",
     });
     expect(loggerError).toHaveBeenCalled();
