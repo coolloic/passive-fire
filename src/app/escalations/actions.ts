@@ -6,12 +6,13 @@ import type {
   RaiseEscalationRequest,
 } from "@/components/organisms/EscalationForm";
 import type { AddNoteOutcome } from "@/components/organisms/NoteForm";
+import type { ResolveOutcome, ResolveRequest } from "@/components/organisms/ResolveForm";
 import { getCurrentUser } from "@/lib/auth/session";
 import { createSupabaseEscalationRepository } from "@/lib/data/escalation-repository";
 import { createSupabaseReadinessDataSource } from "@/lib/data/readiness-repository";
 import { todayIso } from "@/lib/format/date";
 import { logger } from "@/lib/logger";
-import { addEscalationNote, raiseEscalation } from "@/lib/services/escalations";
+import { addEscalationNote, raiseEscalation, resolveEscalation } from "@/lib/services/escalations";
 import { createServerSupabaseClient } from "@/lib/supabase/server-client";
 
 /** Raises an escalation. Only team leaders; everything else is checked again on the server. */
@@ -56,6 +57,29 @@ export async function addNoteAction(request: {
     return result;
   } catch (error) {
     logger.error("Could not add escalation note", error);
+    return { kind: "error" };
+  }
+}
+
+/** Resolves an escalation. Only project managers; the database checks the role again. */
+export async function resolveEscalationAction(request: ResolveRequest): Promise<ResolveOutcome> {
+  try {
+    const user = await getCurrentUser();
+    if (user?.role !== "project_manager") return { kind: "not_found" };
+    const result = await resolveEscalation(
+      createSupabaseEscalationRepository(createServerSupabaseClient()),
+      {
+        ...request,
+        resolution: request.resolution === "" ? undefined : request.resolution,
+      },
+    );
+    if (result.kind === "resolved") {
+      revalidatePath("/inbox", "layout");
+      revalidatePath("/escalations", "layout");
+    }
+    return result;
+  } catch (error) {
+    logger.error("Could not resolve escalation", error);
     return { kind: "error" };
   }
 }

@@ -84,3 +84,40 @@ export async function addEscalationNote(
     throw error;
   }
 }
+
+const resolveSchema = z.object({
+  escalationId: z.uuid(),
+  resolution: z.enum(
+    ["stock_arriving", "different_solution_nominated", "planned_work_rescheduled"],
+    {
+      error: "Choose how the shortage was resolved.",
+    },
+  ),
+  comment: noteSchema.optional(),
+});
+
+export type ResolveEscalationResult =
+  | { kind: "resolved" }
+  | { kind: "not_open" }
+  | { kind: "invalid"; message: string }
+  | { kind: "not_found" };
+
+/** Resolves an Open escalation with a required resolution (spec FR-8). */
+export async function resolveEscalation(
+  escalations: EscalationRepository,
+  input: unknown,
+): Promise<ResolveEscalationResult> {
+  const parsed = resolveSchema.safeParse(input);
+  if (!parsed.success) return { kind: "invalid", message: firstIssue(parsed.error) };
+  try {
+    const status = await escalations.resolve(
+      parsed.data.escalationId,
+      parsed.data.resolution,
+      parsed.data.comment ? parsed.data.comment : null,
+    );
+    return { kind: status };
+  } catch (error) {
+    if (error instanceof EscalationForbiddenError) return { kind: "not_found" };
+    throw error;
+  }
+}

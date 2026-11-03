@@ -4,7 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createSupabaseEscalationRepository } from "@/lib/data/escalation-repository";
 import { createSupabaseReadinessDataSource } from "@/lib/data/readiness-repository";
 import { SAMPLE_PERSONAS, SAMPLE_PLANNED_WORK } from "@/lib/sample-data/site";
-import { addEscalationNote, raiseEscalation } from "@/lib/services/escalations";
+import { addEscalationNote, raiseEscalation, resolveEscalation } from "@/lib/services/escalations";
 import { admin, createPersona, isoDate, signInAsDemo, type Persona } from "./support";
 
 const pw = (key: string) => SAMPLE_PLANNED_WORK.find((work) => work.key === key)!.id;
@@ -156,5 +156,76 @@ describe("tracking escalations", () => {
     expect(record?.notes.map((note) => note.authorName)).toEqual(
       expect.arrayContaining(["Sam Taylor (SAMPLE)", null]),
     );
+  });
+});
+
+describe("resolving escalations", () => {
+  it("shows the project manager every escalation, Open first, with who raised it", async () => {
+    const inbox = await createSupabaseEscalationRepository(manager).listForInbox();
+    expect(inbox.length).toBeGreaterThanOrEqual(3);
+    const firstResolved = inbox.findIndex((escalation) => escalation.state === "resolved");
+    if (firstResolved !== -1) {
+      expect(
+        inbox.slice(firstResolved).every((escalation) => escalation.state === "resolved"),
+      ).toBe(true);
+    }
+    expect(inbox.every((escalation) => escalation.raisedByName === "Sam Taylor (SAMPLE)")).toBe(
+      true,
+    );
+  });
+
+  it("lets the project manager resolve with a reason; the team leader sees the result", async () => {
+    const id = randomUUID();
+    await raiseEscalation(deps(leader), { id, plannedWorkId: pw("PW7") }, isoDate(0));
+
+    await expect(
+      resolveEscalation(createSupabaseEscalationRepository(manager), {
+        escalationId: id,
+        resolution: "stock_arriving",
+        comment: " Wrap due Tuesday ",
+      }),
+    ).resolves.toEqual({ kind: "resolved" });
+
+    const seenByLeader = await createSupabaseEscalationRepository(leader).get(id);
+    expect(seenByLeader).toMatchObject({
+      state: "resolved",
+      resolution: "stock_arriving",
+      resolutionComment: "Wrap due Tuesday",
+    });
+    expect(seenByLeader?.resolvedAt).not.toBeNull();
+
+    await expect(
+      resolveEscalation(createSupabaseEscalationRepository(manager), {
+        escalationId: id,
+        resolution: "planned_work_rescheduled",
+      }),
+    ).resolves.toEqual({ kind: "not_open" });
+  });
+
+  it("refuses a team leader, even for their own escalation", async () => {
+    const id = randomUUID();
+    await raiseEscalation(deps(leader), { id, plannedWorkId: pw("PW2") }, isoDate(0)).catch(
+      () => undefined,
+    );
+    const [open] = (await createSupabaseEscalationRepository(leader).listMine()).filter(
+      (escalation) => escalation.state === "open",
+    );
+    await expect(
+      resolveEscalation(createSupabaseEscalationRepository(leader), {
+        escalationId: open!.id,
+        resolution: "stock_arriving",
+      }),
+    ).resolves.toEqual({ kind: "not_found" });
+    const after = await createSupabaseEscalationRepository(leader).get(open!.id);
+    expect(after?.state).toBe("open");
+  });
+
+  it("reports not found for an escalation that does not exist", async () => {
+    await expect(
+      resolveEscalation(createSupabaseEscalationRepository(manager), {
+        escalationId: randomUUID(),
+        resolution: "stock_arriving",
+      }),
+    ).resolves.toEqual({ kind: "not_found" });
   });
 });
