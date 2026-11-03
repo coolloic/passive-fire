@@ -4,7 +4,7 @@ import {
   type EscalationRepository,
 } from "@/lib/data/escalation-repository";
 import type { PlannedWorkDetailSource, PlannedWorkRecord } from "@/lib/data/readiness-repository";
-import { addEscalationNote, raiseEscalation } from "./escalations";
+import { addEscalationNote, raiseEscalation, resolveEscalation } from "./escalations";
 
 const TODAY = "2026-11-10";
 const ID = "a0000000-0000-4000-8007-000000000001";
@@ -46,6 +46,8 @@ function escalations(overrides: Partial<EscalationRepository> = {}): EscalationR
   return {
     raise: vi.fn(async () => ({ status: "created" as const, escalationId: ID })),
     listMine: vi.fn(async () => []),
+    listForInbox: vi.fn(async () => []),
+    resolve: vi.fn(async () => "resolved" as const),
     get: vi.fn(async () => null),
     addNote: vi.fn(async () => undefined),
     ...overrides,
@@ -197,5 +199,79 @@ describe("addEscalationNote", () => {
     await expect(addEscalationNote(escalations(), undefined)).resolves.toMatchObject({
       kind: "invalid",
     });
+  });
+});
+
+describe("resolveEscalation", () => {
+  it("resolves with the reason and a trimmed comment", async () => {
+    const repo = escalations();
+    await expect(
+      resolveEscalation(repo, {
+        escalationId: ID,
+        resolution: "stock_arriving",
+        comment: " Due Tuesday ",
+      }),
+    ).resolves.toEqual({
+      kind: "resolved",
+    });
+    expect(repo.resolve).toHaveBeenCalledWith(ID, "stock_arriving", "Due Tuesday");
+  });
+
+  it("sends no comment when it is blank", async () => {
+    const repo = escalations();
+    await resolveEscalation(repo, {
+      escalationId: ID,
+      resolution: "planned_work_rescheduled",
+      comment: "  ",
+    });
+    expect(repo.resolve).toHaveBeenCalledWith(ID, "planned_work_rescheduled", null);
+  });
+
+  it.each(["not_open", "not_found"] as const)("passes through %s", async (status) => {
+    const repo = escalations({ resolve: vi.fn(async () => status) });
+    await expect(
+      resolveEscalation(repo, { escalationId: ID, resolution: "stock_arriving" }),
+    ).resolves.toEqual({ kind: status });
+  });
+
+  it("requires a resolution", async () => {
+    await expect(resolveEscalation(escalations(), { escalationId: ID })).resolves.toEqual({
+      kind: "invalid",
+      message: "Choose how the shortage was resolved.",
+    });
+  });
+
+  it("rejects an unknown resolution and a long comment", async () => {
+    await expect(
+      resolveEscalation(escalations(), { escalationId: ID, resolution: "ignored" }),
+    ).resolves.toMatchObject({ kind: "invalid" });
+    await expect(
+      resolveEscalation(escalations(), {
+        escalationId: ID,
+        resolution: "stock_arriving",
+        comment: "x".repeat(1001),
+      }),
+    ).resolves.toEqual({ kind: "invalid", message: "Keep the note to 1000 characters or fewer." });
+  });
+
+  it("is not found when the database refuses, and rethrows other errors", async () => {
+    await expect(
+      resolveEscalation(
+        escalations({ resolve: vi.fn(async () => Promise.reject(new EscalationForbiddenError())) }),
+        {
+          escalationId: ID,
+          resolution: "stock_arriving",
+        },
+      ),
+    ).resolves.toEqual({ kind: "not_found" });
+    await expect(
+      resolveEscalation(
+        escalations({ resolve: vi.fn(async () => Promise.reject(new Error("db"))) }),
+        {
+          escalationId: ID,
+          resolution: "stock_arriving",
+        },
+      ),
+    ).rejects.toThrow("db");
   });
 });

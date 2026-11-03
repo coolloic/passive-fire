@@ -4,6 +4,7 @@ import { DataAccessError } from "./readiness-repository";
 import {
   EscalationForbiddenError,
   createSupabaseEscalationRepository,
+  sortForInbox,
 } from "./escalation-repository";
 
 type Result = { data: unknown; error: unknown };
@@ -43,6 +44,7 @@ const summaryRow = {
     crews: { name: "Crew Alpha" },
     sites: { name: "Harbour View" },
   },
+  raised_by_profile: { display_name: "Sam" },
 };
 
 const summary = {
@@ -55,6 +57,7 @@ const summary = {
   raisedAt: "2026-11-03T10:00:00Z",
   resolution: null,
   shortageClearedAtSync: false,
+  raisedByName: "Sam",
 };
 
 describe("raise", () => {
@@ -204,6 +207,82 @@ describe("addNote", () => {
       createSupabaseEscalationRepository(
         client({ data: null, error: { code: "500" } }).client,
       ).addNote(ID, "x"),
+    ).rejects.toThrowError(DataAccessError);
+  });
+});
+
+describe("listForInbox", () => {
+  it("returns escalations sorted for the inbox", async () => {
+    const rows = [
+      {
+        ...summaryRow,
+        id: "r-old",
+        state: "resolved",
+        raised_at: "2026-11-01T00:00:00Z",
+        raised_by_profile: null,
+      },
+      { ...summaryRow, id: "o-new", raised_at: "2026-11-03T00:00:00Z" },
+      { ...summaryRow, id: "o-old", raised_at: "2026-11-02T00:00:00Z" },
+    ];
+    const result = await createSupabaseEscalationRepository(
+      client({ data: rows, error: null }).client,
+    ).listForInbox();
+    expect(result.map((escalation) => escalation.id)).toEqual(["o-old", "o-new", "r-old"]);
+    expect(result[2]?.raisedByName).toBeNull();
+  });
+
+  it("wraps errors", async () => {
+    await expect(
+      createSupabaseEscalationRepository(
+        client({ data: null, error: { message: "x" } }).client,
+      ).listForInbox(),
+    ).rejects.toThrowError("Could not load escalations");
+  });
+});
+
+describe("sortForInbox", () => {
+  it("puts Open first, oldest first, then Resolved newest first", () => {
+    const at = (id: string, state: "open" | "resolved", raisedAt: string) =>
+      ({ ...summary, id, state, raisedAt }) as typeof summary & { state: "open" | "resolved" };
+    expect(
+      sortForInbox([
+        at("r1", "resolved", "2026-11-01"),
+        at("o2", "open", "2026-11-04"),
+        at("r2", "resolved", "2026-11-05"),
+        at("o1", "open", "2026-11-02"),
+      ]).map((escalation) => escalation.id),
+    ).toEqual(["o1", "o2", "r2", "r1"]);
+  });
+});
+
+describe("resolve", () => {
+  it("calls resolve_escalation and returns the status", async () => {
+    const fake = client(undefined, { data: "resolved", error: null });
+    await expect(
+      createSupabaseEscalationRepository(fake.client).resolve(ID, "stock_arriving", null),
+    ).resolves.toBe("resolved");
+    expect(fake.rpcFn).toHaveBeenCalledWith("resolve_escalation", {
+      p_id: ID,
+      p_resolution: "stock_arriving",
+      p_comment: null,
+    });
+  });
+
+  it("maps permission errors, wraps others and rejects unknown statuses", async () => {
+    await expect(
+      createSupabaseEscalationRepository(
+        client(undefined, { data: null, error: { code: "42501" } }).client,
+      ).resolve(ID, "stock_arriving", null),
+    ).rejects.toThrowError(EscalationForbiddenError);
+    await expect(
+      createSupabaseEscalationRepository(
+        client(undefined, { data: null, error: { code: "500" } }).client,
+      ).resolve(ID, "stock_arriving", null),
+    ).rejects.toThrowError(DataAccessError);
+    await expect(
+      createSupabaseEscalationRepository(
+        client(undefined, { data: "weird", error: null }).client,
+      ).resolve(ID, "stock_arriving", null),
     ).rejects.toThrowError(DataAccessError);
   });
 });

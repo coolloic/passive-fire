@@ -27,6 +27,8 @@ export interface EscalationSummary {
   raisedAt: string;
   resolution: EscalationResolution | null;
   shortageClearedAtSync: boolean;
+  /** Who raised it; null when the reader may not see that profile. */
+  raisedByName: string | null;
 }
 
 export interface EscalationLineRecord {
@@ -51,9 +53,18 @@ export interface EscalationRecord extends EscalationSummary {
   notes: EscalationNoteRecord[];
 }
 
+export type ResolveStatus = "resolved" | "not_open" | "not_found";
+
 export interface EscalationRepository {
   raise(input: RaiseEscalationInput): Promise<{ status: RaiseStatus; escalationId: string }>;
   listMine(): Promise<EscalationSummary[]>;
+  /** Every escalation the reader may see: Open first (oldest first), then Resolved (newest first). */
+  listForInbox(): Promise<EscalationSummary[]>;
+  resolve(
+    id: string,
+    resolution: EscalationResolution,
+    comment: string | null,
+  ): Promise<ResolveStatus>;
   get(id: string): Promise<EscalationRecord | null>;
   addNote(escalationId: string, body: string): Promise<void>;
 }
@@ -84,6 +95,7 @@ const summaryFields = {
     crews: z.object({ name: z.string() }),
     sites: z.object({ name: z.string() }),
   }),
+  raised_by_profile: z.object({ display_name: z.string() }).nullable(),
 };
 const summaryRowSchema = z.object(summaryFields);
 const recordRowSchema = z.object({
@@ -116,7 +128,8 @@ const recordRowSchema = z.object({
 
 const SUMMARY_SELECT =
   "id, planned_work_id, state, raised_at, resolution, shortage_cleared_at_sync, " +
-  "planned_work!inner(work_date, crews!inner(name), sites!inner(name))";
+  "planned_work!inner(work_date, crews!inner(name), sites!inner(name)), " +
+  "raised_by_profile:profiles!escalations_raised_by_fkey(display_name)";
 const RECORD_SELECT =
   `${SUMMARY_SELECT}, resolution_comment, resolved_at, ` +
   "escalation_lines(quantity_short, reason, products(name, unit)), " +
@@ -136,7 +149,18 @@ function toSummary(row: z.infer<typeof summaryRowSchema>): EscalationSummary {
     raisedAt: row.raised_at,
     resolution: row.resolution,
     shortageClearedAtSync: row.shortage_cleared_at_sync,
+    raisedByName: row.raised_by_profile?.display_name ?? null,
   };
+}
+
+/** Open first (oldest first), then Resolved (newest first) — spec AC-8.1. */
+export function sortForInbox(escalations: readonly EscalationSummary[]): EscalationSummary[] {
+  const open = escalations.filter((escalation) => escalation.state === "open");
+  const resolved = escalations.filter((escalation) => escalation.state === "resolved");
+  return [
+    ...open.sort((a, b) => a.raisedAt.localeCompare(b.raisedAt)),
+    ...resolved.sort((a, b) => b.raisedAt.localeCompare(a.raisedAt)),
+  ];
 }
 
 function parse<T>(schema: z.ZodType<T>, data: unknown, operation: string): T {
@@ -174,6 +198,23 @@ export function createSupabaseEscalationRepository(client: SupabaseClient): Esca
         .order("raised_at", { ascending: false });
       if (error) throw new DataAccessError("escalations", error);
       return parse(z.array(summaryRowSchema), data, "escalations").map(toSummary);
+    },
+
+    async listForInbox() {
+      const { data, error } = await client.from("escalations").select(SUMMARY_SELECT);
+      if (error) throw new DataAccessError("escalations", error);
+      return sortForInbox(parse(z.array(summaryRowSchema), data, "escalations").map(toSummary));
+    },
+
+    async resolve(id, resolution, comment) {
+      const { data, error } = await client.rpc("resolve_escalation", {
+        p_id: id,
+        p_resolution: resolution,
+        p_comment: comment,
+      });
+      if (error?.code === INSUFFICIENT_PRIVILEGE) throw new EscalationForbiddenError();
+      if (error) throw new DataAccessError("escalation", error);
+      return parse(z.enum(["resolved", "not_open", "not_found"]), data, "escalation");
     },
 
     async get(id) {
