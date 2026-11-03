@@ -25,6 +25,7 @@
     "db:seed:generate": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/generate-seed.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "0.135.0",
     "@serwist/next": "^9.5.13",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.118.0",
