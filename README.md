@@ -162,6 +162,7 @@ Pushes and pull requests run [`.github/workflows/ci.yml`](.github/workflows/ci.y
 1. **quality**: format check, lint, typecheck, unit tests with coverage.
 2. **e2e**: production build and Playwright (the HTML report is uploaded as an artifact).
 3. **deploy**: runs only after both checks pass. It uses the Vercel CLI to build and deploy, creating a **preview** for same-repo PRs and a **production** deploy for `main`. The deployment URL is recorded on the GitHub environment.
+4. **Approval gate**: the `production` GitHub Environment requires a reviewer to approve before the production deploy runs, and only allows deploys from `main`. Approve it from the paused run's **Review deployments** button. PR previews deploy without approval.
 
 One-time setup:
 
