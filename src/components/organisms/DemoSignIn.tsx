@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/atoms/Button";
+import { clearPrivateCaches } from "@/lib/offline/cache";
 
 export interface DemoSignInState {
   message: string | null;
@@ -12,10 +13,12 @@ type DemoRole = "team_leader" | "project_manager";
 interface DemoSignInProps {
   /** Signs in as the persona for `role`. Redirects on success; resolves with a message on failure. */
   action: (role: DemoRole) => Promise<DemoSignInState>;
+  /** Injected for tests. */
+  clearCaches?: () => Promise<void>;
 }
 
 /** Lets reviewers try the app as one of the two SAMPLE demo personas. */
-export function DemoSignIn({ action }: DemoSignInProps) {
+export function DemoSignIn({ action, clearCaches = clearPrivateCaches }: DemoSignInProps) {
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -23,6 +26,8 @@ export function DemoSignIn({ action }: DemoSignInProps) {
     setPending(true);
     setMessage(null);
     try {
+      // A new person may be using this device: drop anything saved for the previous one.
+      await clearCaches();
       const result = await action(role);
       setMessage(result.message);
     } catch {
