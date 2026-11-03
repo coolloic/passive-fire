@@ -1,0 +1,149 @@
+﻿Internal Code,Supplier Ref. Code,Supplier,Orientation,Substrate,Service Classification,Service Type,Service Size,Integrity,Insulation,Service Type Option,Substrate Option
+0334,V1.11-22SFR00038-146-E,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Non-Combustible Pipe,Copper Pipe,Ø100mm,60,-,Copper Pipe,Plasterboard Wall
+0335,V1.12-22SFR00058-165-E,Ryanfire,Wall,"KOROK®, KOROK® wall (51mm)",Non-Combustible Pipe,Copper Pipe,Ø100mm,60,-,Copper Pipe,Korok Wall
+0344,V1.20-23SFR00092-256-G,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Non-Combustible Pipe,Steel Pipe,Ø28mm,60,60,Steel Pipe,Plasterboard Wall
+0345,V1.21-23SFR00083-253-D,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (2 layers 13mm)",Non-Combustible Pipe,Copper Pipe,Ø100mm,120,90,Copper Pipe,Plasterboard Wall
+0347,V1.23-24SFR00041-300-C,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Non-Combustible Pipe,Copper Pipe,Ø100mm,60,60,Copper Pipe,Plasterboard Wall
+0348,V1.24-24SFR00046-304-F,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Non-Combustible Pipe,Copper Pipe,Ø40mm,60,60,Copper Pipe,Plasterboard Wall
+0375,V15.1-21SFR00018-130-D,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (2 layers 13mm)",Insulated Pipe,Copper Pipe  - 50mm Fibreglass,Ø32mm,60,60,Insulated Copper Pipe,Plasterboard Wall
+0378,V16.4-FRT 200058-80-E,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Insulated Pipe,Copper Pipe  - 38mm Nitrile Rubber,Ø80mm,60,60,Insulated Copper Pipe,Plasterboard Wall
+0379,V16.5-PF 20095-17-D,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (2 layers 13mm)",Insulated Pipe,Copper Pipe  - 20mm Nitrile Rubber,Ø32mm,120,90,Insulated Copper Pipe,Plasterboard Wall
+0380,V16.6-21SFR00018-130-F,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (2 layers 13mm)",Insulated Pipe,Copper Pipe  - 20mm Thermobreak,Ø32mm,120,120,Insulated Copper Pipe,Plasterboard Wall
+0383,V16.8-23SFR00023-206-D,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 19mm)",Insulated Pipe,Copper Pipe  - 25mm Thermobreak,Ø65mm,120,120,Insulated Copper Pipe,Plasterboard Wall
+0384,V16.8-23SFR00030-216-D,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 19mm)",Insulated Pipe,Copper Pipe  - 65mm Thermobreak,Ø50mm,120,90,Insulated Copper Pipe,Plasterboard Wall
+0393,V17.16-21SFR00059-104-L,Ryanfire,Floor,"Timber Infill, 119mm plywood timber infill floor",Insulated Pipe,"HVAC Bundle TPS, Pair coil, PVC",60,90,60,Pair Coil,Timber Infill Floor
+0416,V20.20-21SFR00017-112-F,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (2 layers 13mm)",Combustible Pipe,POLYBUTE Pipe,Ø28mm,120,120,Polybutylene Pipe,Plasterboard Wall
+0426,V20.31-23SFR00053-228-F,Ryanfire,Wall,"unlined Timber, Ryanfire 90mm Naked Wall System",Combustible Pipe,PEX-AL Pipe,Ø20mm,60,60,PEX-AL Pipe,Other
+0434,V21.10-PF 19061-81-C,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Combustible Pipe,KELOX Pipe  - 13mm PE,Ø32mm,60,30,KELOX Pipe,Plasterboard Wall
+0435,V21.11-PF 19061-81-D,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Combustible Pipe,KELOX Pipe  - 13mm PE,Ø32mm,60,60,KELOX Pipe,Plasterboard Wall
+0438,V21.16-23SFR00002-185-B,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Combustible Pipe,PEX Pipe,Ø25mm,60,30,PEX Pipe,Plasterboard Wall
+0440,V21.18-23SFR00044-221-F,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Combustible Pipe,PP-R Pipe,Ø25mm,60,60,PP-R Pipe,Plasterboard Wall
+0441,V21.19-23SFR00002-185-D,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Combustible Pipe,POLYBUTE Pipe,Ø28mm,60,60,Polybutylene Pipe,Plasterboard Wall
+0444,V21.2-21SFR00051-98-A,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Combustible Pipe,PVC Pipe,Ø40mm,60,60,PVC Pipe,Plasterboard Wall
+0447,V21.23-FRT 190080-58-T,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (2 layers 13mm)",Combustible Pipe,PVC Pipe,Ø40mm,120,90,PVC Pipe,Plasterboard Wall
+0450,V21.26-22SFR00057-162-E,Ryanfire,Wall,"KOROK®, KOROK® wall (51mm)",Combustible Pipe,PVC Socket,Ø100mm,60,60,PVC Pipe,Korok Wall
+0451,V21.27-22SFR00053-158-E,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Combustible Pipe,PEX Pipe,Ø25mm,60,60,PEX Pipe,Plasterboard Wall
+0452,V21.28-22SFR00053-158-F,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall ( 1 layer 13mm)",Combustible Pipe,PEX-AL Pipe,Ø25mm,60,60,PEX-AL Pipe,Plasterboard Wall
+0454,V21.2-FRT 190250-56-H,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Combustible Pipe,PVC Pipe,Ø65mm,60,45,PVC Pipe,Plasterboard Wall
+0455,V21.30-22SFR00073-184-B,Ryanfire,Wall,"KOROK®, KOROK® wall (78mm)",Combustible Pipe,PVC Pipe,Ø65mm,120,120,PVC Pipe,Korok Wall
+0458,V21.32-23SFR00025-204-E,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Combustible Pipe,PVC Pipe,Ø80mm,60,60,PVC Pipe,Plasterboard Wall
+0459,V21.33-23SFR00025-204-C,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Combustible Pipe,KELOX Pipe,Ø50mm,60,60,KELOX Pipe,Plasterboard Wall
+0460,V21.34-23SFR00021-199-D,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Non-Combustible Pipe,Steelox Pipe,Ø20mm,60,60,Steel Pipe,Plasterboard Wall
+0461,V21.35-23SFR00009-200-E,Ryanfire,Wall,"Concrete, concrete wall",Combustible Pipe,PVC Pipe,Ø100mm,180,180,PVC Pipe,Concrete Wall
+0462,V21.36-23SFR00044-221-C,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Combustible Pipe,PP-MD Pipe,Ø75mm,60,60,PP-MD Pipe,Plasterboard Wall
+0463,V21.37-23SFR00045-225-A,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Combustible Pipe,PP-MD Pipe,Ø50mm,60,60,PP-MD Pipe,Plasterboard Wall
+0464,V21.38-23SFR00080-246-B,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Combustible Pipe,PEX Pipe,Ø25mm,60,60,PEX Pipe,Plasterboard Wall
+0465,V21.39-23SFR00084-257-B,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Combustible Pipe,PEX-AL Pipe,Ø25mm,60,60,PEX-AL Pipe,Plasterboard Wall
+0470,V21.42-23SFR00089-280-I,Ryanfire,Wall,"AFS Logicwall®, AFS Logicwall®",Combustible Pipe,PVC Pipe,Ø65mm,120,120,PVC Pipe,AFS Logic Wall
+0471,V21.43-24SFR00007-270-D,Ryanfire,Wall,"CLT, CLT wall",Combustible Pipe,PVC Pipe,Ø65mm,60,60,PVC Pipe,CLT Wall
+0472,V21.44-24SFR00007-270-G,Ryanfire,Wall,"CLT, CLT wall",Combustible Pipe,PVC Socket,Ø100mm,60,60,PVC Pipe,CLT Wall
+0473,V21.45-24SFR00021-301-B,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Insulated Pipe,PEX Pipe  - 25mm Thermobreak,Ø20mm,60,45,Insulated PEX Pipe,Plasterboard Wall
+0474,V21.46-24SFR00021-301-F,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Insulated Pipe,PEX Pipe  - 13mm Nitrile Rubber,Ø20mm,60,60,Insulated PEX Pipe,Plasterboard Wall
+0478,V21.7-21SFR00051-98-H,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Combustible Pipe,PVC Socket,Ø100mm,60,60,PVC Pipe,Plasterboard Wall
+0479,V21.8-FRT 190251-55-B,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall ( 1 layer 13mm)",Combustible Pipe,PP-R Pipe,Ø160mm,30,30,PP-R Pipe,Plasterboard Wall
+0481,V22.10-23SFR00005-192-C,Ryanfire,Floor,"Concrete, 150mm concrete floor",Combustible Pipe,PVC Pipe,Ø80mm,180,180,PVC Pipe,Concrete Floor
+0484,V22.10-PF 20097-18-I,Ryanfire,Floor,"Concrete, 120mm concrete floor",Combustible Pipe,PVC Pipe,Ø65mm,120,120,PVC Pipe,Concrete Floor
+0485,V22.11-PF 19060-74-B,Ryanfire,Floor,"Timber Infill, 100mm timber infill floor",Combustible Pipe,PVC Pipe,Ø50mm,90,90,PVC Pipe,Timber Infill Floor
+0490,V22.16-PF 20061-87-C,Ryanfire,Floor,"PLT, 90mm PLT floor",Combustible Pipe,PVC Pipe,Ø65mm,60,60,PVC Pipe,PLT Floor
+0501,V22.27-FRT 190285-72-I,Ryanfire,Floor,"Concrete, 100mm concrete floor",Combustible Pipe,PVC Socket,Ø100mm,120,120,PVC Pipe,Concrete Floor
+0503,V22.29-21SFR00056-101-J,Ryanfire,Ceiling,"FR plasterboard, FR plasterboard ceiling (1 layer 16mm)",Combustible Pipe,PEX-AL Pipe,Ø40mm,60,60,PEX-AL Pipe,Plasterboard Ceiling
+0508,V22.33-21SFR00059-104-B,Ryanfire,Floor,"Timber Infill, 119mm plywood timber infill floor",Combustible Pipe,PVC Pipe,Ø32mm,90,90,PVC Pipe,Timber Infill Floor
+0509,V22.34-21SFR00059-104-J,Ryanfire,Floor,"Timber Infill, 119mm plywood timber infill floor",Combustible Pipe,PVC Socket,Ø100mm,90,90,PVC Pipe,Timber Infill Floor
+0510,V22.35-22SFR00072-181-C,Ryanfire,Ceiling,"FR plasterboard, FR plasterboard ceiling (1 layer 16mm)",Electrical Penetration,PVC Conduit,Ø25mm,60,60,PVC Conduit,Plasterboard Ceiling
+0512,V22.36-23SFR00075-234-G,Ryanfire,Floor,"CLT, 103mm CLT floor",Combustible Pipe,PVC Pipe,Ø80mm,60,60,PVC Pipe,CLT Floor
+0519,V22.42-24SFR00060-302-D,Ryanfire,Floor,"Concrete, 120mm concrete floor",Combustible Pipe,PVC Pipe,Ø50mm,120,120,PVC Pipe,Concrete Floor
+0521,V22.44-22SFR00074-171-C,Ryanfire,Floor,"Concrete, 125mm concrete floor",Combustible Pipe,PVC Pipe,Ø100mm,60,60,PVC Pipe,Concrete Floor
+0522,V22.45-23SFR00003-187-E,Ryanfire,Floor,"Composite, 125mm ComFlor SR floor",Combustible Pipe,PVC Pipe,Ø50mm,60,60,PVC Pipe,Composite Floor
+0523,V22.46-23SFR00005-192-E,Ryanfire,Floor,"Concrete, 150mm concrete floor",Combustible Pipe,HDPE Pipe,Ø65mm,180,180,HDPE Pipe,Concrete Floor
+0524,V22.46-23SFR00047-226-B,Ryanfire,Floor,"Concrete, 125mm concrete floor",Combustible Pipe,HDPE Pipe,Ø100mm,120,120,HDPE Pipe,Concrete Floor
+0525,V22.47-23SFR00061-244-A,Ryanfire,Floor,"Concrete, 125mm concrete floor",Combustible Pipe,PVC Pipe,Ø225mm,120,120,PVC Pipe,Concrete Floor
+0526,V22.48-23SFR00046-223-B,Ryanfire,Floor,"Concrete, 125mm concrete floor",Combustible Pipe,PP-MD Pipe,Ø50mm,120,120,PP-MD Pipe,Concrete Floor
+0527,V22.49-23SFR00079-252-A,Ryanfire,Floor,"Concrete, 150mm concrete floor",Combustible Pipe,PVC Floor waste,Ø50mm,120,120,PVC Pipe,Concrete Floor
+0528,V22.50-23SFR00079-252-C,Ryanfire,Floor,"Concrete, 150mm concrete floor",Combustible Pipe,HDPE Floor waste,Ø100mm,120,120,HDPE Pipe,Concrete Floor
+0530,V22.52-24SFR00035-297-D,Ryanfire,Ceiling,"FR plasterboard, FR plasterboard ceiling (2 layers 19mm)",Combustible Pipe,PVC Pipe,Ø50mm,120,120,PVC Pipe,Plasterboard Ceiling
+0533,V22.55-23SFR00090-255-B,Ryanfire,Floor,"Concrete, FR plasterboard bulkhead in 150mm concrete floor",Combustible Pipe,PVC Pipe,Ø100mm,60,60,PVC Pipe,Concrete Floor
+0534,V22.56-24SFR00057-309-E,Ryanfire,Floor,"Hollow Core, 385mm hollow core concrete floor",Combustible Pipe,PVC Pipe,Ø50mm,120,120,PVC Pipe,Hollow Core
+0535,V22.57-24SFR00057-309-I,Ryanfire,Floor,"Hollow Core, 385mm hollow core floor",Combustible Pipe,PVC Socket,Ø100mm,120,120,PVC Pipe,Hollow Core
+0536,V22.58-25SFR00001-311-C,Ryanfire,Ceiling,"FR plasterboard, FR plasterboard ceiling (1 layer 13mm)",Combustible Pipe,PVC Pipe,Ø50mm,30,30,PVC Pipe,Plasterboard Ceiling
+0537,V22.59-25SFR00001-311-E,Ryanfire,Ceiling,"FR plasterboard, FR plasterboard ceiling (1 layer 13mm)",Combustible Pipe,PEX Pipe,Ø20mm,30,30,PEX Pipe,Plasterboard Ceiling
+0538,V22.60-25SFR00001-311-G,Ryanfire,Ceiling,"FR plasterboard, FR plasterboard ceiling (1 layer 13mm)",Combustible Pipe,PEX-AL Pipe,Ø20mm,30,30,PEX-AL Pipe,Plasterboard Ceiling
+0540,V22.7-21SFR00057-105-C,Ryanfire,Ceiling,"FR plasterboard, FR plasterboard ceiling (1 layer 16mm)",Combustible Pipe,PVC Pipe,Ø65mm,60,60,PVC Pipe,Plasterboard Ceiling
+0541,V22.7-FRT 190271-65-A,Ryanfire,Ceiling,"FR plasterboard, FR plasterboard ceiling (1 layer 16mm)",Combustible Pipe,PVC Pipe,Ø50mm,60,30,PVC Pipe,Plasterboard Ceiling
+0542,V22.8-21SFR00056-101-G,Ryanfire,Ceiling,"FR plasterboard, FR plasterboard ceiling (1 layer 16mm)",Combustible Pipe,PVC Socket,Ø100mm,60,60,PVC Pipe,Plasterboard Ceiling
+0543,V22.9-21SFR00056-101-H,Ryanfire,Ceiling,"FR plasterboard, FR plasterboard ceiling (1 layer 16mm)",Combustible Pipe,PEX Pipe,Ø40mm,60,30,PEX Pipe,Plasterboard Ceiling
+0548,V23.14-22SFR00005-111-B,Ryanfire,Floor,"Concrete, 120mm concrete floor",Combustible Pipe,PVC Pipe,Ø40mm,60,60,PVC Pipe,Concrete Floor
+0552,V23.18-22SFR00027-134-E,Ryanfire,Floor,"Composite, 125mm composite floor",Combustible Pipe,PVC Pipe,Ø50mm,90,90,PVC Pipe,Composite Floor
+0553,V23.19-22SFR00027-134-G,Ryanfire,Floor,"Composite, 125mm composite floor",Combustible Pipe,PVC Socket,Ø100mm,90,90,PVC Pipe,Composite Floor
+0554,V23.20-22SFR00063-167-C,Ryanfire,Floor,"Composite, 120mm composite floor",Combustible Pipe,HDPE Pipe,Ø50mm,60,60,HDPE Pipe,Composite Floor
+0563,V23.9-PF 20106-91-B,Ryanfire,Floor,"Concrete + Woodtex, 140mm concrete floor & Woodtex soffit",Combustible Pipe,PVC Pipe,Ø100mm,60,60,PVC Pipe,Concrete + Woodtex Floor
+0572,V25.15-23SFR00006-190-C,Ryanfire,Floor,"Concrete, 125mm concrete floor",Combustible Pipe,POLYBUTE Pipe,Ø28mm,120,120,Polybutylene Pipe,Concrete Floor
+0581,V25.21-22SFR00048-154-C,Ryanfire,Floor,"Composite, 120mm composite floor",Combustible Pipe,HDPE Pipe,Ø56mm,60,60,HDPE Pipe,Composite Floor
+0586,V25.24-23SFR00005-192-H,Ryanfire,Floor,"Concrete, 150mm concrete floor",Combustible Pipe,PP-R Pipe,Ø75mm,180,180,PP-R Pipe,Concrete Floor
+0587,V25.24-24SFR00037-303-B,Ryanfire,Floor,"Concrete, 120mm concrete floor",Combustible Pipe,PP-R Pipe,Ø90mm,120,120,PP-R Pipe,Concrete Floor
+0598,V25.2-FRT 200018-79-A,Ryanfire,Floor,"Concrete, 150mm concrete floor",Combustible Pipe,PVC Pipe,Ø100mm,120,120,PVC Pipe,Concrete Floor
+0599,V25.30-21SFR00061-106-K,Ryanfire,Floor,"Timber Infill, 119mm plywood timber infill floor",Combustible Pipe,PVC Pipe,Ø65mm,60,60,PVC Pipe,Timber Infill Floor
+0600,V25.31-22SFR00076-186-E,Ryanfire,Floor,"Composite, 125mm composite floor",Combustible Pipe,PEX Pipe,Ø25mm,60,60,PEX Pipe,Composite Floor
+0601,V25.33-23SFR00046-223-F,Ryanfire,Floor,"Concrete, 125mm concrete floor",Combustible Pipe,PP-MD Pipe,Ø40mm,120,120,PP-MD Pipe,Concrete Floor
+0604,V25.35-24SFR00037-303-D,Ryanfire,Floor,"Concrete, 120mm concrete floor",Combustible Pipe,PP-MD Socket,Ø40mm,120,120,PP-MD Pipe,Concrete Floor
+0609,V25.3-PF 19071-76-E,Ryanfire,Floor,"Composite, composite floor",Combustible Pipe,PP-R Pipe,Ø110mm,120,30,PP-R Pipe,Composite Floor
+0646,V27.13-22SFR00050-160-B,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 19mm)",Electrical Penetration,Cable Tray D2,900mm x 50mm,60,60,Cable Tray,Plasterboard Wall
+0651,V27.17-23SFR00072-238-B,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 19mm)",Electrical Penetration,Cable Tray D2,900mm x 50mm,120,90,Cable Tray,Plasterboard Wall
+0659,V27.8-PF 19010-62-15,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Electrical Penetration,Cable Tray D1,300mm,60,60,Cable Tray,Plasterboard Wall
+0661,V28.2-23SFR00010-194-E,Ryanfire,Wall,"Concrete, concrete wall",Combustible Pipe,PVC Pipe,Ø50mm,240,240,PVC Pipe,Concrete Wall
+0662,V28.3-23SFR00014-193-E,Ryanfire,Floor,"Concrete, 150mm concrete floor",Combustible Pipe,PVC Pipe,Ø50mm,240,240,PVC Pipe,Concrete Floor
+0677,V29.24-21SFR00057-105-A,Ryanfire,Ceiling,"FR plasterboard, FR plasterboard ceiling (1 layer 16mm)",Electrical Penetration,Cable Bundle TPS,Ø100mm,60,60,Cable (Single or Bundle),Plasterboard Ceiling
+0684,V29.30-21SFR00061-106-D,Ryanfire,Floor,"Timber Infill, 119mm plywood timber infill floor",Electrical Penetration,PVC Conduit,Ø50mm,60,60,PVC Conduit,Timber Infill Floor
+0686,V29.32-22SFR00004-117-F,Ryanfire,Floor,"Concrete, 120mm concrete floor",Electrical Penetration,PVC Conduit TPS,Ø50mm,60,60,PVC Conduit,Concrete Floor
+0688,V29.34-23SFR00075-234-E,Ryanfire,Floor,"CLT, 103mm CLT floor",Electrical Penetration,Cable Bundle Mixed,Ø100mm,60,60,Cable (Single or Bundle),CLT Floor
+0689,V29.35-22SFR00040-148-E,Ryanfire,Floor,"CLT, 90mm CLT floor",Electrical Penetration,PVC Conduit TPS,Ø50mm,60,60,PVC Conduit,CLT Floor
+0707,V29.51-24SFR00008-263-B,Ryanfire,Floor,"Composite, 125mm composite floor",Electrical Penetration,PVC Conduit,Ø50mm,90,90,PVC Conduit,Composite Floor
+0708,V29.52-24SFR00008-263-E,Ryanfire,Floor,"Composite, 125mm composite floor",Electrical Penetration,PVC Conduit,Ø50mm,90,90,PVC Conduit,Composite Floor
+0710,V29.54-23SFR00058-276-D,Ryanfire,Ceiling,"KOROK®, KOROK® ceiling",Electrical Penetration,Cable  TPS,Ø16mm,120,120,Cable (Single or Bundle),Korok Ceiling
+0722,V3.1-PF 19012-63-B,Ryanfire,Floor,"Composite, composite floor",Non-Combustible Pipe,Copper Pipe,Ø150mm,120,-,Copper Pipe,Composite Floor
+0724,V3.2-PF 19012-63-E,Ryanfire,Floor,"Composite, composite floor",Non-Combustible Pipe,Copper Pipe,Ø150mm,120,-,Copper Pipe,Composite Floor
+0726,V3.4-23SFR00017-196-D,Ryanfire,Floor,"Concrete, 125mm concrete floor",Non-Combustible Pipe,Copper Pipe,Ø50mm,120,120,Copper Pipe,Concrete Floor
+0731,V33.13-22SFR00065-175-C,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 19mm)",Electrical Penetration,PVC Conduit,Ø50mm,120,90,PVC Conduit,Plasterboard Wall
+0733,V33.14-23SFR00001-188-F,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Electrical Penetration,PVC Conduit,Ø50mm,60,60,PVC Conduit,Plasterboard Wall
+0734,V33.15-23SFR00034-210-F,Ryanfire,Wall,"KOROK®, KOROK® wall (51 mm)",Electrical Penetration,PVC Conduit,Ø50mm,60,60,PVC Conduit,Korok Wall
+0735,V33.16-23SFR00089-280-F,Ryanfire,Wall,"AFS Logicwall®, AFS Logicwall®",Electrical Penetration,PVC Conduit,Ø50mm,120,120,PVC Conduit,AFS Logic Wall
+0736,V33.4-PF 20067-88-A,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Electrical Penetration,PVC Conduit,Ø50mm,60,60,PVC Conduit,Plasterboard Wall
+0740,V33.6-PF 20094-15-C,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (2 layers 13mm)",Electrical Penetration,PVC Conduit,Ø50mm,120,120,PVC Conduit,Plasterboard Wall
+0742,V33.8-FRT 190079-11-C,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (2 layers 13mm)",Electrical Penetration,PVC Conduit,Ø32mm,120,60,PVC Conduit,Plasterboard Wall
+0743,V33.9-FRT 190079-11-M,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (2 layers 13mm)",Electrical Penetration,PVC Conduit,Ø50mm,120,60,PVC Conduit,Plasterboard Wall
+0766,V36.7-FRT 190080-58-B,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (2 layers 13mm)",Electrical Penetration,Cable Bundle TPS,Ø30mm,120,60,Cable (Single or Bundle),Plasterboard Wall
+0787,V43.4-23SFR00078-251-B,Ryanfire,Floor,"Concrete, 125mm concrete floor",Electrical Penetration,Cable Tray Mains,900mm,120,120,Cable Tray,Concrete Floor
+0788,V46.3-22SFR00013-118-D,Ryanfire,Wall,"FR plasterboard, 102mm FR plasterboard (1 layer 19mm)",Other,Blank,1100x35mm,120,90,Other,Plasterboard Wall
+0789,V46.3-22SFR00032-137-D,Ryanfire,Wall,"FR plasterboard, 102mm FR plasterboard (1 layer 19mm)",Other,Blank,1100x10mm,60,60,Other,Plasterboard Wall
+0790,V46.4-22SFR00012-152-C,Ryanfire,Wall,"FR plasterboard, 102mm FR plasterboard (1 layer 19mm)",Other,Blank,1100x10mm,120,120,Other,Plasterboard Wall
+0791,V46.4-22SFR00033-138-C,Ryanfire,Wall,"FR plasterboard, 102mm FR plasterboard (1 layer 19mm)",Other,Blank,1100x10mm,120,60,Other,Plasterboard Wall
+0793,V46.6-23SFR00098-258-B,Ryanfire,Wall,"Concrete, 150mm concrete wall",Other,Blank,1100x35mm,120,120,Other,Concrete Wall
+0798,V5.13-PF 20095-17-G,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (2 layers 13mm)",Combustible Pipe,PVC Pipe,Ø50mm,120,120,PVC Pipe,Plasterboard Wall
+0804,V5.19-21SFR00017-112-C,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (2 layers 13mm)",Non-Combustible Pipe,Copper Pipe,Ø150mm,120,-,Copper Pipe,Plasterboard Wall
+0808,V5.20-22SFR00044-157-E,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 19mm)",Combustible Pipe,PVC Pipe,Ø80mm,90,90,PVC Pipe,Plasterboard Wall
+0811,V5.3-PF 19010-62-1,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Non-Combustible Pipe,Copper Pipe,Ø150mm,60,-,Copper Pipe,Plasterboard Wall
+0813,V5.4-PF 19010-62-11,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Combustible Pipe,PVC Pipe,Ø65mm,60,-,PVC Pipe,Plasterboard Wall
+0815,V5.6-PF 19010-62-19,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (1 layer 13mm)",Combustible Pipe,HDPE Pipe,Ø150mm,30,30,HDPE Pipe,Plasterboard Wall
+0829,V52.1-21SFR00049-99-B,Ryanfire,Floor,"Concrete, 75mm linear gap in 120mm concrete floor",Other,Blank,75mm,60,60,Other,Concrete Floor
+0835,V52.13-24SFR00006-288-B,Ryanfire,Floor,"CLT, 75mm linear gap in 106mm CLT floor",Other,Blank,75x1100mm,60,60,Other,CLT Floor
+0842,V52.5-PF 22011-108-B,Ryanfire,Floor,"Concrete, 120mm concrete floor",Other,Blank,50mm,60,30,Other,Concrete Floor
+0853,V53.16-PF 21069-97-SE,Ryanfire,Wall,"Unlined Timber,",Other,Blank,2950x3000mm,60,60,Other,Other
+0861,V53.23-PF 21005-23-C,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (2 layers 13mm)",Electrical Penetration,Cable Tray D1,300mm,120,120,Cable Tray,Plasterboard Wall
+0867,V53.27-21SFR00018-130-A,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (2 layers 13mm)",Other,Blank,1000x1000mm,120,120,Other,Plasterboard Wall
+0918,V64.20-23SFR00097-266-B,Ryanfire,Wall,"FR plasterboard, 190mm Glulam timber beam (1 layer 19mm)",Structural Penetration,Timber Beam,190mm,120,120,Timber Beam,Plasterboard Wall
+0941,V67.11-23SFR00071-237-B,Ryanfire,Ceiling,"FR plasterboard, 19mm FR plasterboard ceiling (1 layer 19mm)",Other,Blank,1100x75mm,120,120,Other,Plasterboard Ceiling
+0943,V67.1-22SFR00013-118-A,Ryanfire,Wall,"FR plasterboard,",Other,Blank,50mm,120,90,Other,Plasterboard Wall
+0944,V67.1-22SFR00032-137-E,Ryanfire,Wall,"FR plasterboard,",Other,Blank,75mm,120,90,Other,Plasterboard Wall
+0946,V67.14-23SFR00096-262-B,Ryanfire,Wall,"FR plasterboard,",Other,Blank,75mm,120,90,Other,Plasterboard Wall
+0952,V67.5-22SFR00062-169-C,Ryanfire,Wall,"FR plasterboard,",Other,Blank,50mm,120,120,Other,Plasterboard Wall
+0955,V67.8-23SFR00048-222-B,Ryanfire,Wall,"FR plasterboard,",Other,Blank,75mm,60,60,Other,Plasterboard Wall
+0959,V7.1-PF 21005-23-A,Ryanfire,Wall,"FR plasterboard, FR plasterboard wall (2 layers 13mm)",Non-Combustible Pipe,Copper Pipe,Ø150mm,120,120,Copper Pipe,Plasterboard Wall
+0964,V9.13-PF 20101-25-D,Ryanfire,Floor,"Concrete, 120mm concrete floor",Non-Combustible Pipe,Brass Pipe,Ø100mm,120,60,Brass Pipe,Concrete Floor
+0968,V9.16-21SFR00063-113-C,Ryanfire,Floor,"Concrete, 120mm concrete floor",Non-Combustible Pipe,Brass Pipe,Ø100mm,90,-,Brass Pipe,Concrete Floor
+0970,V9.18-22SFR00066-173-A,Ryanfire,Floor,"Timber Infill, 100mm Timber Infill floor",Non-Combustible Pipe,Brass Pipe,Ø100mm,60,15,Brass Pipe,Timber Infill Floor
+0972,V9.20-22SFR00069-179-C,Ryanfire,Floor,"Concrete, 125mm concrete floor",Non-Combustible Pipe,Copper Pipe,Ø150mm,120,120,Copper Pipe,Concrete Floor
+0973,V9.21-23SFR00024-205-D,Ryanfire,Floor,"Concrete, 125mm concrete floor",Insulated Pipe,Copper Pipe  - 25mm Thermobreak,Ø65mm,60,60,Insulated Copper Pipe,Concrete Floor
+0974,V9.22-23SFR00024-205-B,Ryanfire,Floor,"Concrete, 125mm concrete floor",Insulated Pipe,Copper Pipe  - 25mm Nitrile Rubber,Ø100mm,60,60,Insulated Copper Pipe,Concrete Floor
+0976,V9.24-23SFR00070-249-C,Ryanfire,Floor,"CLT, 103mm CLT floor",Insulated Pipe,Copper Pipe  - 65mm Thermobreak,Ø50mm,60,60,Insulated Copper Pipe,CLT Floor
+0977,V9.25-23SFR00088-260-B,Ryanfire,Floor,"Timber Infill, 100mm timber infill floor",Insulated Pipe,Copper Pipe  - 38mm Nitrile Rubber,Ø32mm,60,60,Insulated Copper Pipe,Timber Infill Floor
+0979,V9.27-24SFR00062-307-B,Ryanfire,Ceiling,"FR plasterboard, FR plasterboard ceiling (1 layer 16mm)",Non-Combustible Pipe,Copper Pipe,80mm,60,15,Copper Pipe,Plasterboard Ceiling
+0980,V9.28-24SFR00063-313-G,Ryanfire,Floor,"CLT, 105mm CLT floor",Non-Combustible Pipe,Copper Pipe,Ø100mm,60,45,Copper Pipe,CLT Floor

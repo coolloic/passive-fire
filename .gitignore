@@ -22,3 +22,22 @@ __pycache__/
 
 # Logs
 *.log
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+.vercel
+
+# Testing
+coverage/
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
+
+# Serwist (generated service worker)
+public/sw.js
+public/sw.js.map
+public/swe-worker-*.js

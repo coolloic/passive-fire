@@ -1,0 +1,15 @@
+.next/
+out/
+coverage/
+playwright-report/
+test-results/
+public/sw.js
+public/swe-worker-*.js
+pnpm-lock.yaml
+docs/*.pdf
+docs/*.csv
+.claude/
+.idea/
+CLAUDE.md
+playwright/.cache/
+blob-report/
