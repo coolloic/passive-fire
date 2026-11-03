@@ -1,8 +1,13 @@
 import { expect, test, type Page } from "@playwright/test";
 import { addDays, relativeDayLabel, todayIso } from "../src/lib/format/date";
+import { resetEscalations } from "./support/database";
 
 const today = todayIso();
 const day = (offset: number) => relativeDayLabel(addDays(today, offset), today);
+
+test.beforeEach(async () => {
+  await resetEscalations();
+});
 
 async function openPlannedWork(page: Page, offset: number) {
   await page.goto("/sign-in");

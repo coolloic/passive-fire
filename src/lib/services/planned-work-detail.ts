@@ -1,4 +1,5 @@
 import type { PlannedWorkDetailSource, ProductUnit } from "@/lib/data/readiness-repository";
+import { escalationLinesFrom, type EscalationLineDraft } from "@/lib/escalation/lines";
 import { computeReadiness } from "@/lib/readiness/compute";
 import { describeReason, describeReliance, type ProductLabel } from "@/lib/readiness/describe";
 import type { IsoDate, ReadinessState } from "@/lib/readiness/types";
@@ -23,6 +24,11 @@ export interface ProductDetail {
   notes: string[];
 }
 
+export interface EscalationLinePreview {
+  line: EscalationLineDraft;
+  description: string;
+}
+
 export type EscalationAction =
   { kind: "escalate" } | { kind: "view"; escalationId: string } | { kind: "none" };
 
@@ -36,6 +42,8 @@ export interface PlannedWorkDetail {
   scenarios: ScenarioDetail[];
   products: ProductDetail[];
   escalation: EscalationAction;
+  /** What an escalation raised now would record (spec AC-7.1). */
+  escalationLines: EscalationLinePreview[];
 }
 
 /**
@@ -133,5 +141,28 @@ export async function getPlannedWorkDetail(
       };
     }),
     escalation,
+    escalationLines: escalationLinesFrom(readiness).map((line) => ({
+      line,
+      description: describeLine(line, lookup),
+    })),
   };
+}
+
+function describeLine(
+  line: EscalationLineDraft,
+  lookup: (id: string) => ProductLabel | undefined,
+): string {
+  switch (line.reason) {
+    case "shortage":
+      return describeReason(
+        { kind: "shortage", productId: line.productId, quantity: line.quantityShort },
+        lookup,
+      );
+    case "no_stock_record":
+      return describeReason({ kind: "no_stock_record", productId: line.productId }, lookup);
+    case "no_nominated_solution":
+      return "A scenario has no nominated solution";
+    case "no_product_requirement":
+      return "Product quantities are unknown for a nominated solution";
+  }
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addDays, formatWorkDate, relativeDayLabel, todayIso } from "./date";
+import { addDays, formatDateTime, formatWorkDate, relativeDayLabel, todayIso } from "./date";
 
 describe("todayIso", () => {
   it("formats the date in the given time zone", () => {
@@ -39,5 +39,12 @@ describe("relativeDayLabel", () => {
     ["2026-11-05", "Thu 5 Nov"],
   ])("%s relative to 2026-11-03 is %s", (date, label) => {
     expect(relativeDayLabel(date, "2026-11-03")).toBe(label);
+  });
+});
+
+describe("formatDateTime", () => {
+  it("shows day, month and 24-hour time in the given zone", () => {
+    expect(formatDateTime("2026-11-03T14:05:00Z", "UTC")).toBe("3 Nov, 14:05");
+    expect(formatDateTime("2026-11-03T14:05:00Z")).toBe("3 Nov, 14:05");
   });
 });
