@@ -4,12 +4,14 @@ import { ReadinessBadge } from "./ReadinessBadge";
 
 describe("ReadinessBadge", () => {
   it.each([
-    ["ready", "Ready"],
-    ["short", "Short"],
-    ["unknown", "Unknown"],
-  ] as const)("shows %s as the text %s with a decorative icon", (state, label) => {
+    ["ready", "Ready", "lucide-check"],
+    ["short", "Short", "lucide-x"],
+    ["unknown", "Unknown", "lucide-circle-question-mark"],
+  ] as const)("shows %s as the text %s with a decorative %s icon", (state, label, iconClass) => {
     const { container } = render(<ReadinessBadge state={state} />);
     expect(screen.getByText(label)).toBeInTheDocument();
-    expect(container.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+    const icon = container.querySelector("svg");
+    expect(icon).toHaveAttribute("aria-hidden", "true");
+    expect(icon).toHaveClass(iconClass);
   });
 });
