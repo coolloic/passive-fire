@@ -227,6 +227,38 @@ describe("getPlannedWorkDetail", () => {
     expect(detail.scenarios[0]?.reasons[0]).toBe("Short by 10 × an unknown product");
   });
 
+  it("previews the lines an escalation would record", async () => {
+    const detail = (await getPlannedWorkDetail(source(), "pw", TODAY))!;
+    expect(detail.escalationLines).toEqual([
+      {
+        line: { productId: "collar", quantityShort: 10, reason: "shortage" },
+        description: "Short by 10 × Collar 50",
+      },
+      {
+        line: { productId: null, quantityShort: null, reason: "no_product_requirement" },
+        description: "Product quantities are unknown for a nominated solution",
+      },
+      {
+        line: { productId: null, quantityShort: null, reason: "no_nominated_solution" },
+        description: "A scenario has no nominated solution",
+      },
+    ]);
+  });
+
+  it("describes a missing stock record in the preview", async () => {
+    const detail = (await getPlannedWorkDetail(
+      source({
+        getSupply: vi.fn(async () => ({ stock: new Map([["sealant", 50]]), deliveries: [] })),
+      }),
+      "pw",
+      TODAY,
+    ))!;
+    expect(detail.escalationLines[0]).toEqual({
+      line: { productId: "collar", quantityShort: null, reason: "no_stock_record" },
+      description: "No stock record for Collar 50",
+    });
+  });
+
   it("asks for the names of every product mentioned, including ones without stock", async () => {
     const getProducts = vi.fn(async () => products);
     await getPlannedWorkDetail(source({ getProducts }), "pw", TODAY);
