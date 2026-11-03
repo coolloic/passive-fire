@@ -11,7 +11,26 @@ describe("TextArea", () => {
     expect(ref.current).toBe(field);
     expect(field).toHaveAttribute("rows", "3");
     expect(field).toHaveAttribute("maxLength", "10");
-    expect(field).toHaveClass("hover:border-neutral-500", "focus-visible:outline", "w-full");
+    expect(field).toHaveClass("w-full");
+  });
+
+  it("uses a neutral focus ring and keeps red for invalid input", () => {
+    render(<TextArea aria-label="Note" aria-invalid="true" />);
+    const field = screen.getByRole("textbox", { name: "Note" });
+    expect(field).toHaveClass(
+      "focus-visible:ring-neutral-900",
+      "focus-visible:outline-transparent",
+      "aria-[invalid=true]:border-red-700",
+      "aria-[invalid=true]:focus-visible:ring-red-700",
+    );
+    expect(field.className).not.toMatch(/(^| )focus-visible:(border|ring|outline)-red/);
+  });
+
+  it("looks unavailable when disabled", () => {
+    render(<TextArea aria-label="Question" disabled />);
+    const field = screen.getByRole("textbox", { name: "Question" });
+    expect(field).toBeDisabled();
+    expect(field).toHaveClass("disabled:cursor-not-allowed", "disabled:bg-neutral-100");
   });
 
   it("works without extra classes", () => {
