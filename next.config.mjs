@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import withSerwistInit from "@serwist/next";
+import { securityHeaderRoutes } from "./src/lib/security/headers.mjs";
 
 const revision = process.env.VERCEL_GIT_COMMIT_SHA ?? randomUUID();
 
@@ -20,6 +21,7 @@ const withSerwist = withSerwistInit({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  headers: securityHeaderRoutes,
 };
 
 export default withSerwist(nextConfig);
