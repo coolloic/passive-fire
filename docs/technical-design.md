@@ -32,7 +32,8 @@ flowchart TB
   subgraph Browser
     UI[React UI<br/>Server + Client Components]
     SW[Service worker<br/>Serwist]
-    IDB[(IndexedDB<br/>readiness snapshot, outbox)]
+    CACHE[(Cache Storage<br/>saved Planned Work pages)]
+    IDB[(IndexedDB<br/>outbox)]
   end
   subgraph Next.js server
     PAGES[Server Components<br/>pages]
@@ -46,6 +47,7 @@ flowchart TB
 
   UI --> PAGES & ACTIONS & API
   UI <--> IDB
+  SW <--> CACHE
   SW -.caches.- UI
   PAGES & ACTIONS & API --> REPO
   PAGES & API --> READY
@@ -53,17 +55,17 @@ flowchart TB
   API -->|server-only key| CLAUDE
 ```
 
-| Layer           | Location                                               | Responsibility                                                                           |
-| --------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
-| Pages           | `src/app/**/page.tsx`                                  | Fetch data on the server and compose templates and organisms.                            |
-| Server Actions  | `src/app/**/actions.ts`                                | Raise escalations, add notes, resolve. Validate input with Zod; check the user and role. |
-| Assistant route | `src/app/api/assistant/route.ts`                       | Stream assistant answers; run read-only tools.                                           |
-| Draft route     | `src/app/api/assistant/draft/route.ts`                 | Draft an escalation note from server-computed shortages; returns text, never sends.      |
-| Repositories    | `src/lib/data/`                                        | The only code that talks to Supabase. Typed interfaces, mockable in tests.               |
-| Readiness       | `src/lib/readiness/`                                   | Allocation and readiness rules as pure functions. No I/O.                                |
-| Catalogue       | `src/lib/catalogue/`                                   | CSV parsing and normalisation, used by the seed generator.                               |
-| Offline         | `src/lib/offline/`                                     | IndexedDB snapshot and outbox, sync logic.                                               |
-| UI              | `src/components/{atoms,molecules,organisms,templates}` | Atomic Design, per `CLAUDE.md` §4.                                                       |
+| Layer           | Location                                               | Responsibility                                                                                     |
+| --------------- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| Pages           | `src/app/**/page.tsx`                                  | Fetch data on the server and compose templates and organisms.                                      |
+| Server Actions  | `src/app/**/actions.ts`                                | Raise escalations, add notes, resolve. Validate input with Zod; check the user and role.           |
+| Assistant route | `src/app/api/assistant/route.ts`                       | Stream assistant answers; run read-only tools.                                                     |
+| Draft route     | `src/app/api/assistant/draft/route.ts`                 | Draft an escalation note from server-computed shortages; returns text, never sends.                |
+| Repositories    | `src/lib/data/`                                        | The only code that talks to Supabase. Typed interfaces, mockable in tests.                         |
+| Readiness       | `src/lib/readiness/`                                   | Allocation and readiness rules as pure functions. No I/O.                                          |
+| Catalogue       | `src/lib/catalogue/`                                   | CSV parsing and normalisation, used by the seed generator.                                         |
+| Offline         | `src/lib/offline/`                                     | Which pages may be saved (ADR 0003), the escalation outbox (IndexedDB), sync, and the sent notice. |
+| UI              | `src/components/{atoms,molecules,organisms,templates}` | Atomic Design, per `CLAUDE.md` §4.                                                                 |
 
 ## 3. User experience
 
@@ -249,11 +251,11 @@ docs/solutions-excerpt.csv
 
 ## 11. Trade-offs
 
-| Decision                 | Chosen                                    | Rejected option               | Why                                                                                      |
-| ------------------------ | ----------------------------------------- | ----------------------------- | ---------------------------------------------------------------------------------------- |
-| Readiness logic location | TypeScript pure functions                 | Postgres functions            | Easier to test exhaustively and reuse in the assistant; data volumes per user are small. |
-| Cross-crew allocation    | Narrow `security definer` demand function | Service role key in the app   | Least privilege; other crews' details never leave the database.                          |
-| Offline data             | Readiness snapshot in IndexedDB           | Full offline database replica | Team leaders only read readiness and create escalations offline.                         |
-| Assistant loop           | SDK tool runner                           | Hand-written loop             | Less code to own; Zod validation of tool input.                                          |
-| Sample data              | Generated, committed `seed.sql`           | Hand-written fixtures         | Reproducible; rules are tested; the CSV stays the source.                                |
-| Auth                     | Demo personas on real Supabase Auth       | No auth                       | Keeps RLS honest for the demo.                                                           |
+| Decision                 | Chosen                                                          | Rejected option                                             | Why                                                                                      |
+| ------------------------ | --------------------------------------------------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Readiness logic location | TypeScript pure functions                                       | Postgres functions                                          | Easier to test exhaustively and reuse in the assistant; data volumes per user are small. |
+| Cross-crew allocation    | Narrow `security definer` demand function                       | Service role key in the app                                 | Least privilege; other crews' details never leave the database.                          |
+| Offline data             | Saved Planned Work pages in the service worker cache (ADR 0003) | IndexedDB readiness snapshot; full offline database replica | One rendering path; team leaders only read readiness and create escalations offline.     |
+| Assistant loop           | SDK tool runner                                                 | Hand-written loop                                           | Less code to own; Zod validation of tool input.                                          |
+| Sample data              | Generated, committed `seed.sql`                                 | Hand-written fixtures                                       | Reproducible; rules are tested; the CSV stays the source.                                |
+| Auth                     | Demo personas on real Supabase Auth                             | No auth                                                     | Keeps RLS honest for the demo.                                                           |

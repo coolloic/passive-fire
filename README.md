@@ -5,7 +5,7 @@
 
 A mobile-first, offline-capable web app for **construction team leaders** on the QAntum passive fire compliance platform. Before going on site, a team leader checks that the products needed for planned fire stopping work are in stock, and escalates shortages so the business can nominate a different solution or reschedule the work.
 
-> **Status:** project scaffold. The tech stack, quality gates, PWA shell and CI/CD are in place. The first feature slice has not been built yet.
+> **Status:** slice 1 (readiness check and escalation) is built and tested locally and in CI. It is **not deployed yet**: the cloud deploy job is ready but switched off until a Supabase cloud project and Vercel project exist (see [Deployment](#deployment)).
 
 ## Table of Contents
 
@@ -169,10 +169,10 @@ pnpm test:e2e
     ├── components/            # Atomic Design
     │   ├── atoms/
     │   ├── molecules/
-    │   ├── organisms/         # OfflineIndicator
+    │   ├── organisms/         # Domain sections: lists, forms, navigation, assistant
     │   └── templates/
     ├── hooks/                 # use-online-status
-    ├── lib/                   # env (Zod), logger, supabase clients
+    ├── lib/                   # readiness rules, data access, services, offline, assistant, env, logger
     ├── stores/                # Zustand stores
     └── test/msw/              # Shared MSW server and handlers
 ```
@@ -205,6 +205,8 @@ Code shows _what_ was built, not _why_. An Architecture Decision Record is a sho
 
 ## Deployment
 
+> **Not deployed yet.** CI runs every check on every PR; the deploy job is skipped until the one-time setup below is done and `DEPLOY_ENABLED` is `true`.
+
 Pushes and pull requests run [`.github/workflows/ci.yml`](.github/workflows/ci.yml):
 
 1. **quality**: format check, lint, typecheck, unit tests with coverage.
@@ -214,9 +216,11 @@ Pushes and pull requests run [`.github/workflows/ci.yml`](.github/workflows/ci.y
 
 One-time setup:
 
-1. Create a Vercel project for this repo (`vercel link`). Add the Supabase variables to Vercel's Preview and Production environments.
-2. Add these repository secrets in GitHub: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`. The IDs are in `.vercel/project.json` after linking.
-3. Turn off Vercel's own Git auto-deploy so GitHub Actions is the only deploy path.
+1. Create a Supabase cloud project, apply the migrations in `supabase/migrations/` and load the SAMPLE seed.
+2. Create a Vercel project for this repo (`vercel link`). Add `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` to its Preview and Production environments, plus `AI_ENABLED` and `ANTHROPIC_API_KEY` if the assistant should run.
+3. Add these repository secrets in GitHub: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`. The IDs are in `.vercel/project.json` after linking.
+4. Turn off Vercel's own Git auto-deploy so GitHub Actions is the only deploy path.
+5. Set the repository variable `DEPLOY_ENABLED` to `true`, then approve the first deploy.
 
 ## Sample Data
 
@@ -251,6 +255,15 @@ Demo personas: **Sam Taylor (SAMPLE)**, team leader for both crews, and **Priya 
 - **"Today" is UTC**, to match the local database; real sites need their own time zone.
 - There is no "new version available" prompt yet. A waiting service worker activates the next time all tabs are closed.
 - The icons are placeholder artwork.
+
+### Gaps before production
+
+- **Not deployed.** No public URL yet (see [Deployment](#deployment)).
+- **Open demo sign-in.** On a public URL anyone can sign in as the SAMPLE personas. Fine for SAMPLE data; real users need real sign-in (QAntum's identity provider) and per-user crews.
+- **Assistant cost and evaluation.** On a public URL every visitor shares the demo persona's hourly limit and the API key's cost; it needs a spending cap or `AI_ENABLED=false`, and the manual real-model evaluation in the [test strategy](docs/test-strategy.md).
+- **Monitoring.** Errors go to the console through `src/lib/logger.ts`; production needs a hosted sink (e.g. Sentry) behind the same interface, and uptime alerts.
+- **Device coverage.** iOS Safari's service worker behaviour is checked manually, not in CI.
+- **Time zones and updates.** "Today" is UTC, and there is no "new version available" prompt (above).
 
 ### Possible enhancement: structured offline data
 
