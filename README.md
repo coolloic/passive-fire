@@ -46,7 +46,7 @@ What the scaffold includes today:
 - **Quality gates.** ESLint, Prettier, strict TypeScript, Vitest with a 90% coverage threshold, Playwright on mobile and desktop viewports, Husky pre-commit hooks and commitlint.
 - **CI/CD.** GitHub Actions runs every check, then deploys to Vercel (preview for PRs, production for `main`).
 
-Planned for the first slice (see [Roadmap](#roadmap)): material readiness for planned work, with shortage escalation.
+Planned for the first slice (see [Roadmap](#roadmap)): a readiness check for planned work, with shortage escalation.
 
 ## Tech Stack
 
@@ -214,10 +214,10 @@ One-time setup:
 
 Tasks for slice 1 are tracked in [`docs/delivery-plan.md`](docs/delivery-plan.md).
 
-1. **Material readiness check (first slice):** for a planned work package, list the required products per nominated solution against stock, and highlight shortages.
-2. **Shortage escalation:** raise and track a shortage with procurement or the project manager.
-3. **Alternative solutions:** suggest catalogue candidates that match on service, orientation, substrate and fire rating. Each candidate is clearly marked **"requires approval"**, because a matching catalogue field alone is not proof of compliance.
-4. **Schedule impact:** link readiness to crew schedules, and work offline on site.
+1. **Readiness check and escalation (slice 1):** show whether each planned work is Ready, Short or Unknown against stock and expected deliveries, and escalate shortages to a project manager. Includes offline viewing, escalations queued offline, and an optional read-only AI assistant.
+2. **Candidate solutions:** suggest catalogue solutions that match on service, orientation, substrate and fire rating. Each is clearly marked **"requires approval"**, because a matching catalogue field alone is not proof of compliance. A project manager approves the new nominated solution.
+3. **Stock per location and reservations:** stock held in warehouses, vans and sites, and manual reservations.
+4. **Integration:** real notifications, installations recorded in the operative app reducing stock, and the QAntum web app as the source of truth for sites and planned work.
 
 ## Contributing
 
