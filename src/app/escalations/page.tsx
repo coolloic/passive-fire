@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { EscalationList } from "@/components/organisms/EscalationList";
 import { SignOutButton } from "@/components/organisms/SignOutButton";
 import { AppShell } from "@/components/templates/AppShell";
@@ -11,6 +10,7 @@ import {
 import { logger } from "@/lib/logger";
 import { createServerSupabaseClient } from "@/lib/supabase/server-client";
 import { signOut } from "../sign-in/actions";
+import { TextLink } from "@/components/atoms/TextLink";
 
 export const metadata: Metadata = { title: "My escalations — QAntum Team Leader" };
 
@@ -28,12 +28,9 @@ export default async function MyEscalationsPage() {
       userName={user.displayName}
       actions={<SignOutButton action={signOut} />}
     >
-      <Link
-        href="/planned-work"
-        className="mb-4 inline-flex min-h-11 items-center text-base underline"
-      >
+      <TextLink href="/planned-work" className="mb-4">
         ← Back to planned work
-      </Link>
+      </TextLink>
       {escalations ? (
         <EscalationList
           escalations={escalations}

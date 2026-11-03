@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { AppLink } from "@/components/atoms/AppLink";
 import { ButtonLink } from "@/components/atoms/ButtonLink";
 import { ReadinessBadge } from "@/components/atoms/ReadinessBadge";
 import { DataFreshness } from "@/components/molecules/DataFreshness";
@@ -16,6 +15,7 @@ import { logger } from "@/lib/logger";
 import { getPlannedWorkDetail, type PlannedWorkDetail } from "@/lib/services/planned-work-detail";
 import { createServerSupabaseClient } from "@/lib/supabase/server-client";
 import { signOut } from "../../sign-in/actions";
+import { TextLink } from "@/components/atoms/TextLink";
 
 export const metadata: Metadata = { title: "Planned work detail — QAntum Team Leader" };
 
@@ -46,12 +46,9 @@ export default async function PlannedWorkDetailPage({ params }: PlannedWorkDetai
       userName={user.displayName}
       actions={<SignOutButton action={signOut} />}
     >
-      <AppLink
-        href="/planned-work"
-        className="mb-4 inline-flex min-h-11 items-center text-base underline"
-      >
+      <TextLink href="/planned-work" className="mb-4">
         ← Back to planned work
-      </AppLink>
+      </TextLink>
       {detail ? <DataFreshness asOf={asOf} /> : null}
       {detail ? (
         <div className="flex max-w-3xl flex-col gap-6">

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { TextLink } from "@/components/atoms/TextLink";
 
 /** Shown for planned work that does not exist, belongs to another team leader or is in the past. */
 export default function PlannedWorkNotFound() {
@@ -8,9 +8,7 @@ export default function PlannedWorkNotFound() {
       <p className="text-base">
         This planned work isn&apos;t available. It may have passed, or it may not be yours.
       </p>
-      <Link href="/planned-work" className="inline-flex min-h-11 items-center text-base underline">
-        Back to planned work
-      </Link>
+      <TextLink href="/planned-work">Back to planned work</TextLink>
     </main>
   );
 }

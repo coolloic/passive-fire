@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 import { Button } from "@/components/atoms/Button";
+import { TextArea } from "@/components/atoms/TextArea";
 
 export type AddNoteOutcome =
   | { kind: "added" }
@@ -51,13 +52,12 @@ export function NoteForm({ escalationId, maxLength, action }: NoteFormProps) {
       <label htmlFor={id} className="text-base font-medium">
         Add a note
       </label>
-      <textarea
+      <TextArea
         id={id}
         value={body}
         onChange={(event) => setBody(event.target.value)}
         rows={3}
         maxLength={maxLength}
-        className="rounded-md border border-neutral-300 p-3 text-base dark:border-neutral-600 dark:bg-neutral-900"
       />
       {error ? (
         <p role="alert" className="text-base text-red-700">

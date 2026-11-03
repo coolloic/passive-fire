@@ -1,10 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 import { Button } from "@/components/atoms/Button";
+import { TextArea } from "@/components/atoms/TextArea";
 import { EscalationLineList } from "@/components/molecules/EscalationLineList";
+import { TextLink } from "@/components/atoms/TextLink";
 
 export type RaiseEscalationOutcome =
   | { kind: "created" | "duplicate" | "already_open"; escalationId: string }
@@ -80,14 +81,13 @@ export function EscalationForm({
         <label htmlFor={noteId} className="text-base font-medium">
           Note for the project manager (optional)
         </label>
-        <textarea
+        <TextArea
           id={noteId}
           value={note}
           onChange={(event) => setNote(event.target.value)}
           rows={4}
           aria-describedby={`${noteId}-count`}
           aria-invalid={tooLong}
-          className="rounded-md border border-neutral-300 p-3 text-base dark:border-neutral-600 dark:bg-neutral-900"
         />
         <p
           id={`${noteId}-count`}
@@ -104,9 +104,9 @@ export function EscalationForm({
       {openId ? (
         <p role="alert" className="text-base">
           An escalation is already open for this planned work.{" "}
-          <Link href={`/escalations/${openId}`} className="underline">
+          <TextLink href={`/escalations/${openId}`} variant="inline">
             View open escalation
-          </Link>
+          </TextLink>
         </p>
       ) : null}
       <Button type="submit" disabled={pending || tooLong}>
