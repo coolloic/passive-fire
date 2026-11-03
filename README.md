@@ -16,6 +16,7 @@ A mobile-first, offline-capable web app for **construction team leaders** on the
 - [Usage](#usage)
 - [Testing](#testing)
 - [Project Structure](#project-structure)
+- [Documentation](#documentation)
 - [Deployment](#deployment)
 - [Sample Data](#sample-data)
 - [Known Limitations](#known-limitations)
@@ -137,9 +138,11 @@ pnpm test:e2e
 .
 ├── .github/workflows/ci.yml   # CI: quality → e2e → Vercel deploy
 ├── .husky/                    # pre-commit (lint-staged + typecheck), commit-msg (commitlint)
-├── docs/                      # Brief and supplied Ryanfire solutions catalogue
+├── docs/                      # Brief, Ryanfire catalogue, delivery plan
+│   └── adr/                   # Architecture Decision Records
 ├── e2e/                       # Playwright specs
 ├── public/icons/              # PWA icons (placeholder artwork)
+├── GLOSSARY.md                # Domain language
 └── src/
     ├── app/                   # Routes, layout, manifest.ts, sw.ts, offline page
     ├── components/            # Atomic Design
@@ -154,6 +157,30 @@ pnpm test:e2e
 ```
 
 Coding conventions, architecture rules and agent guidance are in [`CLAUDE.md`](CLAUDE.md).
+
+## Documentation
+
+| Document                                         | Purpose                                                                |
+| ------------------------------------------------ | ---------------------------------------------------------------------- |
+| [`docs/requirements.pdf`](docs/requirements.pdf) | The business brief                                                     |
+| [`GLOSSARY.md`](GLOSSARY.md)                     | Domain language: one agreed term per concept, with the terms to avoid  |
+| [`docs/adr/`](docs/adr/)                         | Architecture Decision Records: why hard-to-reverse decisions were made |
+| [`docs/delivery-plan.md`](docs/delivery-plan.md) | Milestones and tasks for slice 1, linked to GitHub issues              |
+| [`CLAUDE.md`](CLAUDE.md)                         | Engineering rules and the agentic development workflow                 |
+
+### Why a glossary?
+
+Passive fire compliance has overloaded vocabulary. The glossary fixes **one term per concept**, used the same way in the UI, code, tests and docs, and lists synonyms to avoid. For example:
+
+- **Variation** is reserved for QAntum's existing meaning (an installation outside the specification), so a substitution can never be mistaken for a flagged non-compliance.
+- **Unknown** is defined as "a fact is missing, never treated as Ready", and that definition becomes a test case.
+- **Product**, not "material", is used everywhere, so a single search finds every place that handles it.
+
+It also keeps AI coding agents consistent: each session reads the glossary instead of inventing synonyms. Update it whenever a new domain concept appears or a definition gets sharper.
+
+### Why ADRs?
+
+Code shows _what_ was built, not _why_. An Architecture Decision Record is a short note explaining a decision and the alternatives rejected. ADRs are written only when a decision is **hard to reverse**, **surprising without context** and **the result of a real trade-off**. For example, [ADR 0001](docs/adr/0001-responsive-pwa-for-team-leaders.md) explains why team leaders get a responsive web app rather than screens in the Flutter operative app. To change course, add a new ADR that supersedes the old one rather than drifting silently. Smaller rules, such as allocating stock by date, belong in the specification instead.
 
 ## Deployment
 
@@ -184,6 +211,8 @@ One-time setup:
 - The icons are placeholder artwork.
 
 ## Roadmap
+
+Tasks for slice 1 are tracked in [`docs/delivery-plan.md`](docs/delivery-plan.md).
 
 1. **Material readiness check (first slice):** for a planned work package, list the required products per nominated solution against stock, and highlight shortages.
 2. **Shortage escalation:** raise and track a shortage with procurement or the project manager.
