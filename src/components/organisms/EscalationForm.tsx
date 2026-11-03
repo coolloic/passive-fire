@@ -5,13 +5,11 @@ import { useId, useState } from "react";
 import { Button } from "@/components/atoms/Button";
 import { TextArea } from "@/components/atoms/TextArea";
 import { EscalationLineList } from "@/components/molecules/EscalationLineList";
+import type { SendOutcome } from "@/lib/offline/sync";
 import { TextLink } from "@/components/atoms/TextLink";
 
-export type RaiseEscalationOutcome =
-  | { kind: "created" | "duplicate" | "already_open"; escalationId: string }
-  | { kind: "invalid"; message: string }
-  | { kind: "not_found" }
-  | { kind: "error" };
+/** What sending to the server can return, plus "queued" when saved on the device instead. */
+export type RaiseEscalationOutcome = SendOutcome | { kind: "queued" };
 
 export interface RaiseEscalationRequest {
   id: string;
@@ -46,6 +44,7 @@ export function EscalationForm({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [queued, setQueued] = useState(false);
   const tooLong = note.length > maxNoteLength;
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
@@ -59,7 +58,8 @@ export function EscalationForm({
         router.push(`/escalations/${result.escalationId}`);
         return;
       }
-      if (result.kind === "already_open") setOpenId(result.escalationId);
+      if (result.kind === "queued") setQueued(true);
+      else if (result.kind === "already_open") setOpenId(result.escalationId);
       else if (result.kind === "invalid") setError(result.message);
       else if (result.kind === "not_found") setError("This planned work is no longer available.");
       else setError("We couldn't send the escalation. Try again.");
@@ -67,6 +67,17 @@ export function EscalationForm({
       setError("We couldn't send the escalation. Try again.");
     }
     setPending(false);
+  }
+
+  if (queued) {
+    return (
+      <p
+        role="status"
+        className="rounded-md border border-amber-600 bg-amber-50 p-3 text-base text-amber-900 dark:bg-amber-950 dark:text-amber-200"
+      >
+        Saved on this device. It will be sent when you&apos;re back online.
+      </p>
+    );
   }
 
   return (

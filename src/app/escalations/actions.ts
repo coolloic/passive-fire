@@ -1,10 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import type {
-  RaiseEscalationOutcome,
-  RaiseEscalationRequest,
-} from "@/components/organisms/EscalationForm";
+import type { RaiseEscalationRequest } from "@/components/organisms/EscalationForm";
 import type { AddNoteOutcome } from "@/components/organisms/NoteForm";
 import type { ResolveOutcome, ResolveRequest } from "@/components/organisms/ResolveForm";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -12,13 +9,12 @@ import { createSupabaseEscalationRepository } from "@/lib/data/escalation-reposi
 import { createSupabaseReadinessDataSource } from "@/lib/data/readiness-repository";
 import { todayIso } from "@/lib/format/date";
 import { logger } from "@/lib/logger";
+import type { SendOutcome } from "@/lib/offline/sync";
 import { addEscalationNote, raiseEscalation, resolveEscalation } from "@/lib/services/escalations";
 import { createServerSupabaseClient } from "@/lib/supabase/server-client";
 
 /** Raises an escalation. Only team leaders; everything else is checked again on the server. */
-export async function raiseEscalationAction(
-  request: RaiseEscalationRequest,
-): Promise<RaiseEscalationOutcome> {
+export async function raiseEscalationAction(request: RaiseEscalationRequest): Promise<SendOutcome> {
   try {
     const user = await getCurrentUser();
     if (user?.role !== "team_leader") return { kind: "not_found" };

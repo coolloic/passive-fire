@@ -67,6 +67,16 @@ describe("EscalationForm", () => {
     ]);
   });
 
+  it("confirms an escalation saved on the device for later", async () => {
+    const { send } = setup({ kind: "queued" });
+    await userEvent.click(send);
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Saved on this device. It will be sent when you're back online.",
+    );
+    expect(screen.queryByRole("button", { name: "Send escalation" })).not.toBeInTheDocument();
+    expect(push).not.toHaveBeenCalled();
+  });
+
   it("links to the escalation that is already open", async () => {
     const { send } = setup({ kind: "already_open", escalationId: "open-1" });
     await userEvent.click(send);
