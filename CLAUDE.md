@@ -178,3 +178,32 @@ Project-level MCP servers are defined in `.mcp.json` (committed; must never cont
 
 ## 10. Document Evolution
 - If you find yourself repeatedly making the same assumption mistake, or if the user corrects your code pattern twice in one session, ask the user: *"Should we update CLAUDE.md to remember this constraint?"*
+
+## 11. Agentic Development Workflow
+
+### Spec-Driven & Blueprint Planning
+- **Spec before code.** No feature code is written until its blueprint exists and has been reviewed:
+  - `docs/iteration-plan.md`: iterations and why each one adds value.
+  - `docs/spec/slice-1.md`: functional requirements, acceptance criteria, non-functional requirements, assumptions, exclusions.
+  - `docs/technical-design.md`: UX, data model, components, interfaces, trade-offs.
+  - `docs/test-strategy.md`: what is tested at which level, and why.
+- If an implementation needs to deviate from the spec or design, **stop and update the doc first** (with user approval), then code. The docs and the code must never disagree.
+- **Granular chunking.** One task = one GitHub issue = one branch = one PR, tracked in `docs/delivery-plan.md`. A task must be reviewable in one sitting (aim for ≤ 400 changed lines, excluding lockfiles and generated files); split it before starting if it is larger. Never build or refactor a whole feature or app in a single step.
+- Start each task by restating its acceptance criteria from the issue. Finish by showing how each one is verified (test name or manual check).
+
+### Explicit Context Files
+Read the relevant files at the start of every session or task, and keep them current:
+- `CLAUDE.md`: rules and conventions (this file).
+- `GLOSSARY.md`: the domain language. Use these terms in code identifiers, UI copy, tests and docs; never use a term listed under _Avoid_.
+- `docs/adr/`: architecture decisions. Do not contradict an accepted ADR; propose a new ADR that supersedes it instead.
+- `docs/delivery-plan.md` and the open issue: current scope and status.
+
+**Pinned versions** (knowledge-cutoff guard): Next.js 14.2 (App Router), React 18, Node 22, TypeScript 5, Tailwind CSS 3, ESLint 8 (`.eslintrc.json`), Zod 4, Vitest 5, Playwright 1.x, MSW 3, Serwist 9, Supabase CLI (local Docker).
+- Do not upgrade a major version without user approval and an ADR.
+- Verify library APIs against the installed version (`node_modules/<pkg>`, its types and changelog) rather than from memory, because these may be newer than your training data.
+
+### Version Control & State Management
+- **Frequent checkpoints.** Commit every working state on the feature branch as soon as the checks for that step are green. Do not let large uncommitted changes pile up; each commit is a safe rollback point. Push the branch regularly.
+- **Never commit a broken state** to make progress look faster. If a step goes wrong, roll back to the last checkpoint (`git restore` / `git reset` on the feature branch, with user approval for anything destructive) instead of layering fixes on top.
+- **Change one thing at a time.** Each commit contains one logical change. Never mix a refactor with a behaviour change, or a dependency upgrade with a feature. For a bug fix, first add a failing test that reproduces it, then fix it.
+- **Diff reviews.** Before every commit, review the full staged diff (`git diff --staged`) line by line, including lockfiles, migrations and generated files. Remove anything unrelated to the task, and report anything unexpected to the user. AI-generated output is never accepted unread: the agent reviews its own diff, and a human reviews every line of the PR before merging (Section 9).
