@@ -97,10 +97,10 @@ pnpm db:stop          # stop the containers
 
 ```bash
 cp .env.example .env.local
-pnpm db:env           # prints the local NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY
+pnpm db:env           # prints the local Supabase URL and keys for .env.local
 ```
 
-Paste the two values `pnpm db:env` prints into `.env.local`. This file is git-ignored; never commit it.
+Paste the values `pnpm db:env` prints into `.env.local`. This file is git-ignored; never commit it.
 
 | Variable                        | Exposed to browser | Description                                    |
 | ------------------------------- | ------------------ | ---------------------------------------------- |
