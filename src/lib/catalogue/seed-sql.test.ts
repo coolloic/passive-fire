@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { normaliseSolution } from "./parse";
-import { renderCatalogueSql, sqlLiteral } from "./seed-sql";
+import { renderCatalogueSql, renderSampleProductsSql, sqlLiteral } from "./seed-sql";
 
 describe("sqlLiteral", () => {
   it.each([
@@ -57,5 +57,23 @@ describe("renderCatalogueSql", () => {
 
   it("is deterministic", () => {
     expect(renderCatalogueSql([solution])).toBe(renderCatalogueSql([solution]));
+  });
+});
+
+describe("renderSampleProductsSql", () => {
+  const products = [{ sku: "SAMPLE-A", name: "Collar 'A' (SAMPLE)", unit: "each" as const }];
+  const requirements = [{ internalCode: "0334", sku: "SAMPLE-A", quantityPerPenetration: 0.4 }];
+
+  it("inserts products and joins requirements on internal code and SKU", () => {
+    const sql = renderSampleProductsSql(products, requirements);
+    expect(sql).toContain("-- 1 products, 1 requirements.");
+    expect(sql).toContain("('SAMPLE-A', 'Collar ''A'' (SAMPLE)', 'each', true)");
+    expect(sql).toContain("('0334', 'SAMPLE-A', 0.4)");
+    expect(sql).toContain("join public.solutions s on s.internal_code = v.internal_code");
+  });
+
+  it("omits empty sections", () => {
+    const sql = renderSampleProductsSql([], []);
+    expect(sql).not.toContain("insert into");
   });
 });

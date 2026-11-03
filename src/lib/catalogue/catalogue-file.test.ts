@@ -1,7 +1,9 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { parseCatalogue } from "./parse";
-import { renderCatalogueSql } from "./seed-sql";
+import { requirementsFor } from "./requirement-rules";
+import { SAMPLE_PRODUCTS } from "./sample-products";
+import { renderCatalogueSql, renderSampleProductsSql } from "./seed-sql";
 
 // Guards the real supplied file and the committed seed generated from it.
 const csv = readFileSync("docs/solutions-excerpt.csv", "utf8");
@@ -27,5 +29,45 @@ describe("supplied catalogue", () => {
   it("matches the committed seed (run `pnpm db:seed:generate` if this fails)", () => {
     const committed = readFileSync("supabase/seed/01_catalogue.sql", "utf8");
     expect(renderCatalogueSql(solutions)).toBe(committed);
+  });
+});
+
+describe("SAMPLE product requirements for the supplied catalogue", () => {
+  const requirements = solutions.flatMap(requirementsFor);
+  const covered = new Set(requirements.map((row) => row.internalCode));
+  const uncovered = solutions.filter((solution) => !covered.has(solution.internalCode));
+
+  it("covers every solution a rule applies to", () => {
+    expect(covered.size).toBe(135);
+    expect(requirements).toHaveLength(242);
+  });
+
+  it("leaves exactly the solutions no rule fits without requirements (shown as Unknown)", () => {
+    // Pipes above the 150 mm collar band, single-dimension cable trays, Blank joints of
+    // unknown length, and the structural timber beam.
+    expect(uncovered.map((solution) => solution.internalCode)).toEqual([
+      "0479",
+      "0525",
+      "0659",
+      "0787",
+      "0829",
+      "0842",
+      "0861",
+      "0918",
+      "0943",
+      "0944",
+      "0946",
+      "0952",
+      "0955",
+    ]);
+  });
+
+  it("uses only positive quantities", () => {
+    expect(requirements.every((row) => row.quantityPerPenetration > 0)).toBe(true);
+  });
+
+  it("matches the committed seed (run `pnpm db:seed:generate` if this fails)", () => {
+    const committed = readFileSync("supabase/seed/02_sample_products.sql", "utf8");
+    expect(renderSampleProductsSql(SAMPLE_PRODUCTS, requirements)).toBe(committed);
   });
 });
