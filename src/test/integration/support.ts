@@ -185,3 +185,16 @@ export async function destroyWorld(world: World): Promise<void> {
     await admin.auth.admin.deleteUser(id);
   }
 }
+
+/** The passwordless demo sign-in the app uses: a server-generated magic link, verified. */
+export async function signInAsDemo(email: string): Promise<SupabaseClient> {
+  const link = await admin.auth.admin.generateLink({ type: "magiclink", email });
+  if (link.error) throw link.error;
+  const client = anonClient();
+  const verified = await client.auth.verifyOtp({
+    type: "magiclink",
+    token_hash: link.data.properties.hashed_token,
+  });
+  if (verified.error) throw verified.error;
+  return client;
+}
