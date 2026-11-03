@@ -635,6 +635,19 @@ export type Database = {
       can_read_site: { Args: { target_site_id: string }; Returns: boolean };
       is_project_manager: { Args: Record<PropertyKey, never>; Returns: boolean };
       leads_crew: { Args: { target_crew_id: string }; Returns: boolean };
+      raise_escalation: {
+        Args: {
+          p_id: string;
+          p_lines: Json;
+          p_note: string;
+          p_planned_work_id: string;
+          p_shortage_cleared: boolean;
+        };
+        Returns: {
+          escalation_id: string;
+          status: string;
+        }[];
+      };
       record_assistant_message: {
         Args: { max_per_hour: number };
         Returns: {
