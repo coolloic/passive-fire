@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ButtonLink } from "@/components/atoms/ButtonLink";
 import { EscalationForm } from "@/components/organisms/EscalationForm";
 import { SignOutButton } from "@/components/organisms/SignOutButton";
+import { TeamLeaderNav } from "@/components/organisms/TeamLeaderNav";
 import { AppShell } from "@/components/templates/AppShell";
 import { requireRole } from "@/lib/auth/session";
 import { createSupabaseReadinessDataSource } from "@/lib/data/readiness-repository";
@@ -41,6 +42,7 @@ export default async function EscalatePage({ params }: EscalatePageProps) {
     <AppShell
       title="Escalate a shortage"
       userName={user.displayName}
+      nav={<TeamLeaderNav />}
       actions={<SignOutButton action={signOut} />}
     >
       <TextLink href={`/planned-work/${params.id}`} className="mb-4">

@@ -11,8 +11,11 @@ test.beforeEach(async ({ page }) => {
 test("the assistant explains when it is not configured and keeps the question", async ({
   page,
 }) => {
-  await page.getByRole("button", { name: "Ask the assistant" }).click();
-  const panel = page.getByRole("region", { name: "Assistant" });
+  await page
+    .getByRole("navigation", { name: "Main" })
+    .getByRole("button", { name: "Assistant" })
+    .click();
+  const panel = page.getByRole("dialog", { name: "Assistant" });
   await panel.getByLabel("Your question").fill("What is short on Friday?");
   await panel.getByRole("button", { name: "Ask" }).click();
   await expect(panel.getByRole("alert")).toHaveText("The assistant isn't set up on this server.");
@@ -20,9 +23,12 @@ test("the assistant explains when it is not configured and keeps the question", 
 });
 
 test("the assistant needs a connection", async ({ page, context }) => {
-  await page.getByRole("button", { name: "Ask the assistant" }).click();
+  await page
+    .getByRole("navigation", { name: "Main" })
+    .getByRole("button", { name: "Assistant" })
+    .click();
   await context.setOffline(true);
-  const panel = page.getByRole("region", { name: "Assistant" });
+  const panel = page.getByRole("dialog", { name: "Assistant" });
   await expect(panel.getByRole("status")).toHaveText("The assistant needs a connection.");
   await expect(panel.getByLabel("Your question")).toBeDisabled();
   await context.setOffline(false);

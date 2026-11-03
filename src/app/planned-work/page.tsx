@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { DataFreshness } from "@/components/molecules/DataFreshness";
-import { AssistantPanel } from "@/components/organisms/AssistantPanel";
 import { OutboxPanel } from "@/components/organisms/OutboxPanel";
 import { SaveForOffline } from "@/components/organisms/SaveForOffline";
 import { SignOutButton } from "@/components/organisms/SignOutButton";
 import { PlannedWorkList } from "@/components/organisms/PlannedWorkList";
+import { TeamLeaderNav } from "@/components/organisms/TeamLeaderNav";
 import { AppShell } from "@/components/templates/AppShell";
 import { requireRole } from "@/lib/auth/session";
 import { createSupabaseReadinessDataSource } from "@/lib/data/readiness-repository";
@@ -17,7 +17,6 @@ import {
 import { createServerSupabaseClient } from "@/lib/supabase/server-client";
 import { raiseEscalationAction } from "../escalations/actions";
 import { signOut } from "../sign-in/actions";
-import { TextLink } from "@/components/atoms/TextLink";
 
 export const metadata: Metadata = { title: "Planned work — QAntum Team Leader" };
 
@@ -39,19 +38,16 @@ export default async function PlannedWorkPage() {
     <AppShell
       title="Planned work"
       userName={user.displayName}
+      nav={<TeamLeaderNav />}
       actions={<SignOutButton action={signOut} />}
     >
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-base text-neutral-600 dark:text-neutral-400">
-          Your crews&apos; planned work for the next 14 days. All data is SAMPLE data.
-        </p>
-        <TextLink href="/escalations">My escalations</TextLink>
-      </div>
+      <p className="mb-4 text-base text-neutral-600 dark:text-neutral-400">
+        Your crews&apos; planned work for the next 14 days. All data is SAMPLE data.
+      </p>
       {summaries ? (
         <>
           <DataFreshness asOf={asOf} />
           <OutboxPanel userId={user.id} send={raiseEscalationAction} />
-          <AssistantPanel />
           <PlannedWorkList summaries={summaries} today={today} />
           <SaveForOffline
             hrefs={summaries.map((summary) => `/planned-work/${summary.plannedWorkId}`)}

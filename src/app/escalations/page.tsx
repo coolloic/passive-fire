@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { EscalationList } from "@/components/organisms/EscalationList";
 import { OutboxPanel } from "@/components/organisms/OutboxPanel";
 import { SignOutButton } from "@/components/organisms/SignOutButton";
+import { TeamLeaderNav } from "@/components/organisms/TeamLeaderNav";
 import { AppShell } from "@/components/templates/AppShell";
 import { requireRole } from "@/lib/auth/session";
 import {
@@ -28,6 +29,7 @@ export default async function MyEscalationsPage() {
     <AppShell
       title="My escalations"
       userName={user.displayName}
+      nav={<TeamLeaderNav />}
       actions={<SignOutButton action={signOut} />}
     >
       <TextLink href="/planned-work" className="mb-4">

@@ -83,7 +83,8 @@ Cross-cutting:
 
 - **Readiness badge** (atom): text plus icon for Ready (check), Short (cross), Unknown (question mark). Colour is secondary.
 - **Data freshness bar** (molecule): "Data as of 08:42", turning into a warning after 24 hours. Always visible while offline.
-- **Assistant drawer** (organism): opened from list and detail; shows "Needs a connection" or "Not available" states.
+- **Main navigation** (organism, team leader pages): Planned work, My escalations and Assistant, always within reach: a fixed bottom bar on phones (clear of the home indicator) and part of the sticky header from `md`. The current section is marked with `aria-current`; offline, My escalations is shown as needing a connection.
+- **Assistant drawer** (organism): a modal dialog opened from the navigation on any team leader page (full-screen sheet on phones, side panel from `md`); closes with Close, Escape or the backdrop and keeps the conversation; shows "Needs a connection" or "Not available" states.
 - **Empty and error states** for every list, and a not-found page for missing or inaccessible planned work.
 
 ## 4. Data model

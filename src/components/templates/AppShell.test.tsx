@@ -26,5 +26,16 @@ describe("AppShell", () => {
       </AppShell>,
     );
     expect(screen.getByRole("banner")).toHaveTextContent("Priya");
+    expect(screen.getByRole("main").className).toContain("pb-[max(1.5rem");
+  });
+
+  it("shows navigation and leaves room for the phone bottom bar", () => {
+    render(
+      <AppShell title="Planned work" userName="Sam" nav={<nav aria-label="Main">Links</nav>}>
+        <p>Content</p>
+      </AppShell>,
+    );
+    expect(screen.getByRole("navigation", { name: "Main" })).toBeInTheDocument();
+    expect(screen.getByRole("main").className).toContain("pb-[calc(5rem");
   });
 });

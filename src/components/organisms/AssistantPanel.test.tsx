@@ -1,18 +1,32 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { AskResult } from "@/lib/assistant/client";
-import { AssistantPanel } from "./AssistantPanel";
+import { AssistantPanel, type AssistantPanelProps } from "./AssistantPanel";
+
+/** Opens the dialog the way the navigation does. */
+function Harness({ ask }: Pick<AssistantPanelProps, "ask">) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button type="button" onClick={() => setOpen(true)}>
+        Ask the assistant
+      </button>
+      <AssistantPanel open={open} onClose={() => setOpen(false)} ask={ask} />
+    </>
+  );
+}
 
 function setOnline(value: boolean) {
   vi.spyOn(navigator, "onLine", "get").mockReturnValue(value);
 }
 
 async function openAndAsk(
-  ask: Parameters<typeof AssistantPanel>[0]["ask"],
+  ask: AssistantPanelProps["ask"],
   question = "What is short on Thursday?",
 ) {
-  render(<AssistantPanel ask={ask} />);
+  render(<Harness ask={ask} />);
   await userEvent.click(screen.getByRole("button", { name: "Ask the assistant" }));
   await userEvent.type(screen.getByLabelText("Your question"), question);
   await userEvent.click(screen.getByRole("button", { name: "Ask" }));
@@ -89,7 +103,7 @@ describe("AssistantPanel", () => {
   it("ignores an empty question", async () => {
     setOnline(true);
     const ask = vi.fn();
-    render(<AssistantPanel ask={ask} />);
+    render(<Harness ask={ask} />);
     await userEvent.click(screen.getByRole("button", { name: "Ask the assistant" }));
     expect(screen.getByRole("button", { name: "Ask" })).toBeDisabled();
     await userEvent.type(screen.getByLabelText("Your question"), "   ");
@@ -99,17 +113,57 @@ describe("AssistantPanel", () => {
 
   it("explains it needs a connection while offline", async () => {
     setOnline(false);
-    render(<AssistantPanel ask={vi.fn()} />);
+    render(<Harness ask={vi.fn()} />);
     await userEvent.click(screen.getByRole("button", { name: "Ask the assistant" }));
     expect(screen.getByRole("status")).toHaveTextContent("The assistant needs a connection.");
     expect(screen.getByLabelText("Your question")).toBeDisabled();
   });
 
-  it("closes again", async () => {
+  it("opens as a dialog with the question focused, and closes again", async () => {
     setOnline(true);
-    render(<AssistantPanel />);
+    render(<Harness />);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Ask the assistant" }));
+    expect(screen.getByRole("dialog", { name: "Assistant" })).toBeVisible();
+    expect(screen.getByLabelText("Your question")).toHaveFocus();
     await userEvent.click(screen.getByRole("button", { name: "Close" }));
-    expect(screen.getByRole("button", { name: "Ask the assistant" })).toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("keeps the conversation while closed", async () => {
+    setOnline(true);
+    await openAndAsk(async (_history, onText) => {
+      onText("Two crews are short.");
+      return { kind: "done", status: "ok" };
+    });
+    expect(await screen.findByText("Two crews are short.")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Close" }));
+    await userEvent.click(screen.getByRole("button", { name: "Ask the assistant" }));
+    expect(screen.getByText("Two crews are short.")).toBeVisible();
+  });
+
+  it("closes with Escape and when the backdrop is clicked", async () => {
+    setOnline(true);
+    render(<Harness />);
+    await userEvent.click(screen.getByRole("button", { name: "Ask the assistant" }));
+    const dialog = screen.getByRole("dialog");
+    // Browsers close a modal dialog on Escape and fire `close`.
+    act(() => (dialog as HTMLDialogElement).close());
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Ask the assistant" }));
+    fireEvent.click(screen.getByRole("heading", { name: "Assistant" }));
+    expect(screen.getByRole("dialog")).toBeVisible();
+    fireEvent.click(screen.getByRole("dialog"));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("scrolls the latest answer into view", async () => {
+    setOnline(true);
+    const scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+    await openAndAsk(async () => ({ kind: "done", status: "ok" }));
+    await waitFor(() => expect(scrollIntoView).toHaveBeenCalledWith({ block: "end" }));
+    Reflect.deleteProperty(Element.prototype, "scrollIntoView");
   });
 });
