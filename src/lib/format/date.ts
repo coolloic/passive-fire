@@ -38,3 +38,15 @@ export function relativeDayLabel(date: IsoDate, today: IsoDate): string {
   if (date === addDays(today, 1)) return "Tomorrow";
   return formatWorkDate(date);
 }
+
+/** "3 Nov, 14:05" for timestamps, shown in the site time zone. */
+export function formatDateTime(iso: string, timeZone: string = SITE_TIME_ZONE): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone,
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(new Date(iso));
+}
