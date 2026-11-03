@@ -1,23 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { beforeAll, describe, expect, it } from "vitest";
 import { SAMPLE_PERSONAS, SAMPLE_PLANNED_WORK } from "@/lib/sample-data/site";
-import { admin, anonClient, isoDate } from "./support";
+import { anonClient, isoDate, signInAsDemo } from "./support";
 
 const teamLeader = SAMPLE_PERSONAS.find((persona) => persona.role === "team_leader")!;
 const projectManager = SAMPLE_PERSONAS.find((persona) => persona.role === "project_manager")!;
-
-/** The passwordless demo sign-in task 4.1 will use: a server-generated magic link, verified. */
-async function signInAsDemo(email: string): Promise<SupabaseClient> {
-  const link = await admin.auth.admin.generateLink({ type: "magiclink", email });
-  if (link.error) throw link.error;
-  const client = anonClient();
-  const verified = await client.auth.verifyOtp({
-    type: "magiclink",
-    token_hash: link.data.properties.hashed_token,
-  });
-  if (verified.error) throw verified.error;
-  return client;
-}
 
 let leader: SupabaseClient;
 let manager: SupabaseClient;
