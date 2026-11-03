@@ -1,19 +1,19 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useState } from "react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AskResult } from "@/lib/assistant/client";
+import { resetAssistant, useAssistantStore } from "@/stores/assistant-store";
 import { AssistantPanel, type AssistantPanelProps } from "./AssistantPanel";
 
-/** Opens the dialog the way the navigation does. */
+/** Opens the dialog the way the navigation does: through the assistant store. */
 function Harness({ ask }: Pick<AssistantPanelProps, "ask">) {
-  const [open, setOpen] = useState(false);
+  const setOpen = useAssistantStore((state) => state.setOpen);
   return (
     <>
       <button type="button" onClick={() => setOpen(true)}>
         Ask the assistant
       </button>
-      <AssistantPanel open={open} onClose={() => setOpen(false)} ask={ask} />
+      <AssistantPanel ask={ask} />
     </>
   );
 }
@@ -33,6 +33,7 @@ async function openAndAsk(
 }
 
 describe("AssistantPanel", () => {
+  beforeEach(() => resetAssistant());
   afterEach(() => vi.restoreAllMocks());
 
   it("opens, streams an answer and keeps the conversation", async () => {
@@ -140,6 +141,22 @@ describe("AssistantPanel", () => {
     await userEvent.click(screen.getByRole("button", { name: "Close" }));
     await userEvent.click(screen.getByRole("button", { name: "Ask the assistant" }));
     expect(screen.getByText("Two crews are short.")).toBeVisible();
+  });
+
+  it("keeps the conversation and the draft question when the page changes", async () => {
+    setOnline(true);
+    await openAndAsk(async (_history, onText) => {
+      onText("Two crews are short.");
+      return { kind: "done", status: "ok" };
+    });
+    expect(await screen.findByText("Two crews are short.")).toBeInTheDocument();
+    await userEvent.type(screen.getByLabelText("Your question"), "And Friday?");
+    // Each page renders its own navigation, so a page change remounts the panel.
+    cleanup();
+    render(<Harness />);
+    expect(screen.getByRole("dialog", { name: "Assistant" })).toBeVisible();
+    expect(screen.getByText("Two crews are short.")).toBeVisible();
+    expect(screen.getByLabelText("Your question")).toHaveValue("And Friday?");
   });
 
   it("closes with Escape and when the backdrop is clicked", async () => {

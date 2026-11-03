@@ -1,6 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { resetAssistant } from "@/stores/assistant-store";
 import { TeamLeaderNav } from "./TeamLeaderNav";
 
 let pathname: string | null = "/planned-work";
@@ -12,6 +13,7 @@ function setOnline(value: boolean) {
 
 describe("TeamLeaderNav", () => {
   afterEach(() => {
+    resetAssistant();
     vi.restoreAllMocks();
     pathname = "/planned-work";
   });

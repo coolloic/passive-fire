@@ -6,13 +6,13 @@ import { SignOutButton } from "./SignOutButton";
 describe("SignOutButton", () => {
   it("clears saved pages before signing out", async () => {
     const calls: string[] = [];
-    const clearCaches = vi.fn(async () => {
+    const clearDeviceData = vi.fn(async () => {
       calls.push("clear");
     });
     const action = vi.fn(async () => {
       calls.push("sign out");
     });
-    render(<SignOutButton action={action} clearCaches={clearCaches} />);
+    render(<SignOutButton action={action} clearDeviceData={clearDeviceData} />);
     await userEvent.click(screen.getByRole("button", { name: "Sign out" }));
     expect(calls).toEqual(["clear", "sign out"]);
     expect(screen.getByRole("button", { name: "Sign out" })).toBeDisabled();

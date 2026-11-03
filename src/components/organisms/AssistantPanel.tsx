@@ -1,51 +1,60 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef } from "react";
 import { Button } from "@/components/atoms/Button";
 import { TextArea } from "@/components/atoms/TextArea";
 import { useOnlineStatus } from "@/hooks/use-online-status";
-import { askAssistant, type AskResult } from "@/lib/assistant/client";
-import type { ChatTurn } from "@/lib/assistant/run";
+import { askAssistant } from "@/lib/assistant/client";
 import { formatDateTime } from "@/lib/format/date";
+import { useAssistantStore, type Ask, type AssistantNotice } from "@/stores/assistant-store";
 
 export interface AssistantPanelProps {
-  open: boolean;
-  onClose: () => void;
   /** Injected for tests. */
-  ask?: (history: readonly ChatTurn[], onText: (delta: string) => void) => Promise<AskResult>;
+  ask?: Ask;
 }
 
-function messageFor(result: Exclude<AskResult, { kind: "done" }>): string {
-  if (result.kind === "rate_limited") {
-    return result.retryAt
-      ? `You've reached the limit of 20 questions an hour. Try again after ${formatDateTime(result.retryAt)}.`
-      : "You've reached the limit of 20 questions an hour. Try again later.";
+function messageFor(notice: AssistantNotice): string {
+  switch (notice.kind) {
+    case "refused":
+      return "The assistant can't help with that question.";
+    case "truncated":
+      return "The answer was cut short. Ask a narrower question.";
+    case "rate_limited":
+      return notice.retryAt
+        ? `You've reached the limit of 20 questions an hour. Try again after ${formatDateTime(notice.retryAt)}.`
+        : "You've reached the limit of 20 questions an hour. Try again later.";
+    case "not_configured":
+      return "The assistant isn't set up on this server.";
+    case "disabled":
+      return "The assistant is switched off on this server.";
+    case "unavailable":
+      return "The assistant isn't available for your account.";
+    case "error":
+      return "Something went wrong. Try again.";
   }
-  return MESSAGES[result.kind];
 }
-
-const MESSAGES: Record<Exclude<AskResult["kind"], "done" | "rate_limited">, string> = {
-  not_configured: "The assistant isn't set up on this server.",
-  disabled: "The assistant is switched off on this server.",
-  unavailable: "The assistant isn't available for your account.",
-  error: "Something went wrong. Try again.",
-};
 
 /**
  * A read-only assistant that answers questions about the team leader's planned work, streaming
  * its answer. It cannot change or send anything (spec FR-11). Opens as a modal dialog: a full
- * screen sheet on phones, a side panel on larger screens. The conversation is kept while closed.
+ * screen sheet on phones, a side panel on larger screens. The conversation lives in the assistant
+ * store, so it is kept while closed and when moving between pages.
  */
-export function AssistantPanel({ open, onClose, ask = askAssistant }: AssistantPanelProps) {
+export function AssistantPanel({ ask = askAssistant }: AssistantPanelProps) {
   const id = useId();
   const online = useOnlineStatus();
   const dialog = useRef<HTMLDialogElement>(null);
   const questionField = useRef<HTMLTextAreaElement>(null);
   const end = useRef<HTMLDivElement>(null);
-  const [history, setHistory] = useState<ChatTurn[]>([]);
-  const [question, setQuestion] = useState("");
-  const [pending, setPending] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
+  const open = useAssistantStore((state) => state.open);
+  const history = useAssistantStore((state) => state.history);
+  const question = useAssistantStore((state) => state.question);
+  const pending = useAssistantStore((state) => state.pending);
+  const notice = useAssistantStore((state) => state.notice);
+  const setOpen = useAssistantStore((state) => state.setOpen);
+  const setQuestion = useAssistantStore((state) => state.setQuestion);
+  const send = useAssistantStore((state) => state.send);
+  const close = () => setOpen(false);
 
   useEffect(() => {
     // Effects run after the ref is attached, so the dialog always exists here.
@@ -62,42 +71,19 @@ export function AssistantPanel({ open, onClose, ask = askAssistant }: AssistantP
     end.current?.scrollIntoView?.({ block: "end" });
   }, [history]);
 
-  async function submit(event: React.FormEvent<HTMLFormElement>) {
+  function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const text = question.trim();
-    // The Ask button is disabled while answering or when the question is empty.
-    if (!text) return;
-    const conversation: ChatTurn[] = [...history, { role: "user", content: text }];
-    setHistory([...conversation, { role: "assistant", content: "" }]);
-    setQuestion("");
-    setPending(true);
-    setNotice(null);
-    let answer = "";
-    const result = await ask(conversation, (delta) => {
-      answer += delta;
-      setHistory([...conversation, { role: "assistant", content: answer }]);
-    });
-    if (result.kind === "done") {
-      if (result.status === "refused") setNotice("The assistant can't help with that question.");
-      if (result.status === "truncated")
-        setNotice("The answer was cut short. Ask a narrower question.");
-      setHistory([...conversation, { role: "assistant", content: answer || "(no answer)" }]);
-    } else {
-      setNotice(messageFor(result));
-      setHistory(conversation.slice(0, -1));
-      setQuestion(text);
-    }
-    setPending(false);
+    void send(ask);
   }
 
   return (
     <dialog
       ref={dialog}
       aria-labelledby={`${id}-heading`}
-      onClose={onClose}
+      onClose={close}
       // A click on the backdrop (outside the panel) closes it.
       onClick={(event) => {
-        if (event.target === event.currentTarget) onClose();
+        if (event.target === event.currentTarget) close();
       }}
       className="m-0 h-dvh max-h-none w-full max-w-none bg-[var(--background)] p-0 text-[var(--foreground)] backdrop:bg-neutral-950/50 md:ml-auto md:max-w-md md:border-l md:border-neutral-200 dark:md:border-neutral-700"
     >
@@ -106,7 +92,7 @@ export function AssistantPanel({ open, onClose, ask = askAssistant }: AssistantP
           <h2 id={`${id}-heading`} className="text-lg font-semibold">
             Assistant
           </h2>
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="secondary" onClick={close}>
             Close
           </Button>
         </div>
@@ -141,7 +127,7 @@ export function AssistantPanel({ open, onClose, ask = askAssistant }: AssistantP
         </div>
         {notice ? (
           <p role="alert" className="text-base text-red-700">
-            {notice}
+            {messageFor(notice)}
           </p>
         ) : null}
         <form onSubmit={submit} className="flex flex-col gap-2">

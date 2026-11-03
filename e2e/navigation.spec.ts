@@ -48,3 +48,25 @@ test("my escalations is marked as needing a connection while offline", async ({
     "/escalations",
   );
 });
+
+test("the assistant keeps its conversation across pages until sign-out", async ({ page }) => {
+  const nav = page.getByRole("navigation", { name: "Main" });
+  await nav.getByRole("button", { name: "Assistant" }).click();
+  const assistant = page.getByRole("dialog", { name: "Assistant" });
+  await assistant.getByLabel("Your question").fill("What is short on Friday?");
+  await assistant.getByRole("button", { name: "Close" }).click();
+
+  await nav.getByRole("link", { name: "My escalations" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "My escalations" })).toBeVisible();
+  await nav.getByRole("button", { name: "Assistant" }).click();
+  await expect(assistant.getByLabel("Your question")).toHaveValue("What is short on Friday?");
+  await assistant.getByRole("button", { name: "Close" }).click();
+
+  // Private data is cleared on sign-out.
+  await page.getByRole("button", { name: "Sign out" }).click();
+  await expect(page).toHaveURL(/\/sign-in$/);
+  await page.getByRole("button", { name: "Continue as Team Leader (SAMPLE)" }).click();
+  await expect(page).toHaveURL(/\/planned-work$/);
+  await nav.getByRole("button", { name: "Assistant" }).click();
+  await expect(assistant.getByLabel("Your question")).toHaveValue("");
+});
