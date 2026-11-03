@@ -17,7 +17,7 @@ export default defineConfig({
       exclude: [
         "src/**/*.test.{ts,tsx}",
         "src/**/*.int.test.ts",
-        "src/app/**/{layout,page,manifest}.tsx",
+        "src/app/**/{layout,page,manifest,not-found}.tsx",
         "src/app/manifest.ts",
         "src/app/sw.ts",
         "src/test/**",

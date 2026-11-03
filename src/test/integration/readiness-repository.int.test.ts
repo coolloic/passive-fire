@@ -1,14 +1,15 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import {
   createSupabaseReadinessDataSource,
-  type ReadinessDataSource,
+  type PlannedWorkDetailSource,
 } from "@/lib/data/readiness-repository";
 import { SAMPLE_PERSONAS, SAMPLE_PLANNED_WORK } from "@/lib/sample-data/site";
+import { getPlannedWorkDetail } from "@/lib/services/planned-work-detail";
 import { getPlannedWorkSummaries } from "@/lib/services/planned-work-summaries";
-import { isoDate, signInAsDemo } from "./support";
+import { admin, createPersona, isoDate, signInAsDemo } from "./support";
 
 const teamLeader = SAMPLE_PERSONAS.find((persona) => persona.role === "team_leader")!;
-let source: ReadinessDataSource;
+let source: PlannedWorkDetailSource;
 
 beforeAll(async () => {
   source = createSupabaseReadinessDataSource(await signInAsDemo(teamLeader.email));
@@ -60,5 +61,48 @@ describe("Supabase readiness data source", () => {
     expect(summaries.find((summary) => summary.workDate === isoDate(5))?.reliesOnDelivery).toBe(
       true,
     );
+  });
+});
+
+describe("planned work detail from the database", () => {
+  const pw = (key: string) => SAMPLE_PLANNED_WORK.find((work) => work.key === key)!;
+
+  it("explains why PW3 is short, in plain language", async () => {
+    const detail = await getPlannedWorkDetail(source, pw("PW3").id, isoDate(0));
+    expect(detail?.state).toBe("short");
+    expect(detail?.scenarios[0]?.reasons).toEqual([
+      "Short by 10 × Intumescent pipe collar 50 mm (SAMPLE)",
+      "14 already allocated to earlier planned work",
+      "Delivery of 10 is due on the work date, so it is not counted",
+    ]);
+    expect(detail?.escalation).toEqual({ kind: "escalate" });
+  });
+
+  it("names the solution that has no product requirement", async () => {
+    const detail = await getPlannedWorkDetail(source, pw("PW5").id, isoDate(0));
+    expect(detail?.scenarios.flatMap((scenario) => scenario.reasons)).toContain(
+      "Product quantities unknown for solution 0918",
+    );
+  });
+
+  it("offers no escalation for Ready work", async () => {
+    const detail = await getPlannedWorkDetail(source, pw("PW1").id, isoDate(0));
+    expect(detail?.escalation).toEqual({ kind: "none" });
+  });
+
+  it("treats past planned work as not found", async () => {
+    await expect(getPlannedWorkDetail(source, pw("PW0").id, isoDate(0))).resolves.toBeNull();
+  });
+
+  it("hides the planned work from another team leader", async () => {
+    const stranger = await createPersona("team_leader", "Unrelated leader");
+    try {
+      const strangerSource = createSupabaseReadinessDataSource(stranger.client);
+      await expect(
+        getPlannedWorkDetail(strangerSource, pw("PW3").id, isoDate(0)),
+      ).resolves.toBeNull();
+    } finally {
+      await admin.auth.admin.deleteUser(stranger.id);
+    }
   });
 });

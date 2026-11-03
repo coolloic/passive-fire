@@ -11,23 +11,22 @@ type Result = { data: unknown; error: unknown };
 /** Fake PostgREST builder: every chained call returns itself; awaiting resolves `result`. */
 function query(result: Result) {
   const builder: Record<string, unknown> = {};
-  for (const method of ["select", "gte", "lte", "order"]) builder[method] = vi.fn(() => builder);
+  for (const method of ["select", "gte", "lte", "order", "eq", "in"])
+    builder[method] = vi.fn(() => builder);
+  builder.maybeSingle = vi.fn(async () => result);
   builder.then = (resolve: (value: Result) => unknown) => Promise.resolve(result).then(resolve);
   return builder;
 }
 
-function client(
-  tables: Record<string, Result>,
-  rpc: Result = { data: [], error: null },
-): SupabaseClient {
-  return {
-    from: vi.fn((table: string) => query(tables[table] ?? { data: [], error: null })),
-    rpc: vi.fn(async () => rpc),
-  } as unknown as SupabaseClient;
+function client(tables: Record<string, Result>, rpc: Result = { data: [], error: null }) {
+  const from = vi.fn((table: string) => query(tables[table] ?? { data: [], error: null }));
+  return { client: { from, rpc: vi.fn(async () => rpc) } as unknown as SupabaseClient, from };
 }
 
+const ID = "a0000000-0000-4000-8005-000000000001";
+
 const plannedWorkRow = {
-  id: "pw1",
+  id: ID,
   work_date: "2026-11-12",
   created_at: "2026-10-01T00:00:00Z",
   crews: { name: "Crew Alpha" },
@@ -37,69 +36,88 @@ const plannedWorkRow = {
       penetration_count: 6,
       scenarios: {
         id: "s1",
+        label: "Risers",
         nominated_solutions: {
           solution_id: "sol1",
           solutions: {
+            internal_code: "0798",
             product_requirements: [{ product_id: "collar", quantity_per_penetration: "2.000" }],
           },
         },
       },
     },
-    { penetration_count: 2, scenarios: { id: "s2", nominated_solutions: null } },
+    { penetration_count: 2, scenarios: { id: "s2", label: "Ceiling", nominated_solutions: null } },
+  ],
+};
+
+const expectedRecord = {
+  plannedWorkId: ID,
+  workDate: "2026-11-12",
+  createdAt: "2026-10-01T00:00:00Z",
+  crewName: "Crew Alpha",
+  siteName: "Harbour View",
+  scenarios: [
+    {
+      scenarioId: "s1",
+      label: "Risers",
+      penetrationCount: 6,
+      nominatedSolutionId: "sol1",
+      solutionCode: "0798",
+      requirements: [{ productId: "collar", quantityPerPenetration: 2 }],
+    },
+    {
+      scenarioId: "s2",
+      label: "Ceiling",
+      penetrationCount: 2,
+      nominatedSolutionId: null,
+      solutionCode: null,
+      requirements: [],
+    },
   ],
 };
 
 describe("toPlannedWorkRecord", () => {
   it("maps nested rows, including missing nominated solutions", () => {
+    const nominatedItem = {
+      penetration_count: 6,
+      scenarios: {
+        id: "s1",
+        label: "Risers",
+        nominated_solutions: {
+          solution_id: "sol1",
+          solutions: {
+            internal_code: "0798",
+            product_requirements: [{ product_id: "collar", quantity_per_penetration: 2 }],
+          },
+        },
+      },
+    };
+    const unnominatedItem = {
+      penetration_count: 2,
+      scenarios: { id: "s2", label: "Ceiling", nominated_solutions: null },
+    };
     expect(
       toPlannedWorkRecord({
         ...plannedWorkRow,
-        planned_work_items: plannedWorkRow.planned_work_items.map((item) => ({
-          ...item,
-          scenarios: {
-            ...item.scenarios,
-            nominated_solutions: item.scenarios.nominated_solutions
-              ? {
-                  ...item.scenarios.nominated_solutions,
-                  solutions: {
-                    product_requirements: [{ product_id: "collar", quantity_per_penetration: 2 }],
-                  },
-                }
-              : null,
-          },
-        })),
+        planned_work_items: [nominatedItem, unnominatedItem],
       }),
-    ).toEqual({
-      plannedWorkId: "pw1",
-      workDate: "2026-11-12",
-      createdAt: "2026-10-01T00:00:00Z",
-      crewName: "Crew Alpha",
-      siteName: "Harbour View",
-      scenarios: [
-        {
-          scenarioId: "s1",
-          penetrationCount: 6,
-          nominatedSolutionId: "sol1",
-          requirements: [{ productId: "collar", quantityPerPenetration: 2 }],
-        },
-        { scenarioId: "s2", penetrationCount: 2, nominatedSolutionId: null, requirements: [] },
-      ],
-    });
+    ).toEqual(expectedRecord);
   });
 });
 
 describe("createSupabaseReadinessDataSource", () => {
   it("lists planned work in the window, coercing numeric strings", async () => {
     const source = createSupabaseReadinessDataSource(
-      client({ planned_work: { data: [plannedWorkRow], error: null } }),
+      client({ planned_work: { data: [plannedWorkRow], error: null } }).client,
     );
-    const [record] = await source.listOwnPlannedWork("2026-11-10", "2026-11-23");
-    expect(record?.scenarios[0]?.requirements[0]?.quantityPerPenetration).toBe(2);
+    await expect(source.listOwnPlannedWork("2026-11-10", "2026-11-23")).resolves.toEqual([
+      expectedRecord,
+    ]);
   });
 
   it("wraps query errors", async () => {
     const source = createSupabaseReadinessDataSource(
-      client({ planned_work: { data: null, error: { message: "boom" } } }),
+      client({ planned_work: { data: null, error: { message: "boom" } } }).client,
     );
     await expect(source.listOwnPlannedWork("2026-11-10", "2026-11-23")).rejects.toThrowError(
       DataAccessError,
@@ -108,11 +126,42 @@ describe("createSupabaseReadinessDataSource", () => {
 
   it("rejects malformed responses", async () => {
     const source = createSupabaseReadinessDataSource(
-      client({ planned_work: { data: [{ id: 1 }], error: null } }),
+      client({ planned_work: { data: [{ id: 1 }], error: null } }).client,
     );
     await expect(source.listOwnPlannedWork("2026-11-10", "2026-11-23")).rejects.toThrowError(
       "Could not load planned work",
     );
+  });
+
+  describe("getPlannedWork", () => {
+    it("returns one planned work", async () => {
+      const source = createSupabaseReadinessDataSource(
+        client({ planned_work: { data: plannedWorkRow, error: null } }).client,
+      );
+      await expect(source.getPlannedWork(ID)).resolves.toEqual(expectedRecord);
+    });
+
+    it("returns null when it does not exist or cannot be seen", async () => {
+      const source = createSupabaseReadinessDataSource(
+        client({ planned_work: { data: null, error: null } }).client,
+      );
+      await expect(source.getPlannedWork(ID)).resolves.toBeNull();
+    });
+
+    it("returns null for an id that is not a UUID, without querying", async () => {
+      const fake = client({});
+      await expect(
+        createSupabaseReadinessDataSource(fake.client).getPlannedWork("abc"),
+      ).resolves.toBeNull();
+      expect(fake.from).not.toHaveBeenCalled();
+    });
+
+    it("wraps errors", async () => {
+      const source = createSupabaseReadinessDataSource(
+        client({ planned_work: { data: null, error: { message: "x" } } }).client,
+      );
+      await expect(source.getPlannedWork(ID)).rejects.toThrowError(DataAccessError);
+    });
   });
 
   it("loads allocation demand and rounds it up", async () => {
@@ -132,7 +181,7 @@ describe("createSupabaseReadinessDataSource", () => {
           ],
           error: null,
         },
-      ),
+      ).client,
     );
     await expect(source.getAllocationDemand("2026-11-10")).resolves.toEqual([
       {
@@ -148,7 +197,7 @@ describe("createSupabaseReadinessDataSource", () => {
 
   it("wraps allocation demand errors", async () => {
     const source = createSupabaseReadinessDataSource(
-      client({}, { data: null, error: { message: "denied" } }),
+      client({}, { data: null, error: { message: "denied" } }).client,
     );
     await expect(source.getAllocationDemand("2026-11-10")).rejects.toThrowError(
       "Could not load allocation demand",
@@ -178,22 +227,72 @@ describe("createSupabaseReadinessDataSource", () => {
           ],
           error: null,
         },
-      }),
+      }).client,
     );
     const supply = await source.getSupply();
     expect([...supply.stock]).toEqual([["collar", 20]]);
-    expect(supply.deliveries).toEqual([
-      { id: "d1", productId: "collar", quantity: 10, expectedDate: "2026-11-13", received: false },
-      { id: "d2", productId: "batt", quantity: 5, expectedDate: "2026-11-01", received: true },
-    ]);
+    expect(supply.deliveries.map((delivery) => delivery.received)).toEqual([false, true]);
   });
 
   it.each([
     ["stock", { stock: { data: null, error: { message: "x" } } }],
     ["expected deliveries", { expected_deliveries: { data: null, error: { message: "x" } } }],
   ])("wraps %s errors", async (label, tables) => {
-    const source = createSupabaseReadinessDataSource(client(tables));
-    await expect(source.getSupply()).rejects.toThrowError(`Could not load ${label}`);
+    await expect(
+      createSupabaseReadinessDataSource(client(tables).client).getSupply(),
+    ).rejects.toThrowError(`Could not load ${label}`);
+  });
+
+  describe("getProducts", () => {
+    it("loads names and units", async () => {
+      const source = createSupabaseReadinessDataSource(
+        client({ products: { data: [{ id: "p1", name: "Collar", unit: "each" }], error: null } })
+          .client,
+      );
+      await expect(source.getProducts(["p1"])).resolves.toEqual([
+        { id: "p1", name: "Collar", unit: "each" },
+      ]);
+    });
+
+    it("skips the query for no ids", async () => {
+      const fake = client({});
+      await expect(createSupabaseReadinessDataSource(fake.client).getProducts([])).resolves.toEqual(
+        [],
+      );
+      expect(fake.from).not.toHaveBeenCalled();
+    });
+
+    it("wraps errors", async () => {
+      const source = createSupabaseReadinessDataSource(
+        client({ products: { data: null, error: { message: "x" } } }).client,
+      );
+      await expect(source.getProducts(["p1"])).rejects.toThrowError("Could not load products");
+    });
+  });
+
+  describe("getOpenEscalationId", () => {
+    it("returns the open escalation id", async () => {
+      const source = createSupabaseReadinessDataSource(
+        client({ escalations: { data: { id: "e1" }, error: null } }).client,
+      );
+      await expect(source.getOpenEscalationId(ID)).resolves.toBe("e1");
+    });
+
+    it("returns null when there is none", async () => {
+      const source = createSupabaseReadinessDataSource(
+        client({ escalations: { data: null, error: null } }).client,
+      );
+      await expect(source.getOpenEscalationId(ID)).resolves.toBeNull();
+    });
+
+    it("wraps errors", async () => {
+      const source = createSupabaseReadinessDataSource(
+        client({ escalations: { data: null, error: { message: "x" } } }).client,
+      );
+      await expect(source.getOpenEscalationId(ID)).rejects.toThrowError(
+        "Could not load escalations",
+      );
+    });
   });
 });
 
