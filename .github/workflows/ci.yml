@@ -77,8 +77,15 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
-      - run: pnpm add --global vercel@latest
-      - run: vercel pull --yes --environment="$VERCEL_ENV" --token="$VERCEL_TOKEN"
-      - run: vercel build $PROD_FLAG --token="$VERCEL_TOKEN"
+      - name: Check Vercel secrets
+        run: |
+          for name in VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing repository secret $name (see README > Deployment)"
+              exit 1
+            fi
+          done
+      - run: pnpm dlx vercel@latest pull --yes --environment="$VERCEL_ENV" --token="$VERCEL_TOKEN"
+      - run: pnpm dlx vercel@latest build $PROD_FLAG --token="$VERCEL_TOKEN"
       - id: deploy
-        run: echo "url=$(vercel deploy --prebuilt $PROD_FLAG --token="$VERCEL_TOKEN")" >> "$GITHUB_OUTPUT"
+        run: echo "url=$(pnpm dlx vercel@latest deploy --prebuilt $PROD_FLAG --token="$VERCEL_TOKEN")" >> "$GITHUB_OUTPUT"
