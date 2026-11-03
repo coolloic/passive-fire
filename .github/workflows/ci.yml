@@ -82,8 +82,9 @@ jobs:
   deploy:
     name: Deploy to Vercel
     needs: [quality, e2e, integration]
-    # Preview deploys for same-repo PRs, production deploys for pushes to main.
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    # Skipped until the deployment milestone sets the DEPLOY_ENABLED repository variable to "true".
+    # Then: preview deploys for same-repo PRs, production deploys for pushes to main.
+    if: vars.DEPLOY_ENABLED == 'true' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.event_name == 'push' && 'production' || 'preview' }}
