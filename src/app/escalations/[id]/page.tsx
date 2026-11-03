@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EscalationDetailView } from "@/components/organisms/EscalationDetailView";
 import { NoteForm } from "@/components/organisms/NoteForm";
@@ -15,6 +14,7 @@ import { NOTE_MAX_LENGTH } from "@/lib/services/escalations";
 import { createServerSupabaseClient } from "@/lib/supabase/server-client";
 import { signOut } from "../../sign-in/actions";
 import { addNoteAction } from "../actions";
+import { TextLink } from "@/components/atoms/TextLink";
 
 export const metadata: Metadata = { title: "Escalation — QAntum Team Leader" };
 
@@ -42,12 +42,9 @@ export default async function EscalationPage({ params }: EscalationPageProps) {
       userName={user.displayName}
       actions={<SignOutButton action={signOut} />}
     >
-      <Link
-        href="/escalations"
-        className="mb-4 inline-flex min-h-11 items-center text-base underline"
-      >
+      <TextLink href="/escalations" className="mb-4">
         ← My escalations
-      </Link>
+      </TextLink>
       {escalation ? (
         <EscalationDetailView
           escalation={escalation}

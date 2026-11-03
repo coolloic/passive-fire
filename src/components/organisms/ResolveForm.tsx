@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 import { Button } from "@/components/atoms/Button";
+import { TextArea } from "@/components/atoms/TextArea";
 import type { EscalationResolution } from "@/lib/data/escalation-repository";
 
 export type ResolveOutcome =
@@ -62,14 +63,17 @@ export function ResolveForm({ escalationId, options, maxCommentLength, action }:
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-1 text-base font-medium">Resolution</legend>
         {options.map((option) => (
-          <label key={option.value} className="flex min-h-11 items-center gap-3 text-base">
+          <label
+            key={option.value}
+            className="-mx-2 flex min-h-11 cursor-pointer items-center gap-3 rounded-md px-2 text-base transition-colors hover:bg-neutral-50 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-red-700 dark:hover:bg-neutral-900"
+          >
             <input
               type="radio"
               name={`${id}-resolution`}
               value={option.value}
               checked={resolution === option.value}
               onChange={() => setResolution(option.value)}
-              className="h-5 w-5"
+              className="h-5 w-5 accent-red-700"
             />
             {option.label}
           </label>
@@ -78,13 +82,12 @@ export function ResolveForm({ escalationId, options, maxCommentLength, action }:
       <label htmlFor={`${id}-comment`} className="text-base font-medium">
         Comment for the team leader (optional)
       </label>
-      <textarea
+      <TextArea
         id={`${id}-comment`}
         value={comment}
         onChange={(event) => setComment(event.target.value)}
         rows={3}
         maxLength={maxCommentLength}
-        className="rounded-md border border-neutral-300 p-3 text-base dark:border-neutral-600 dark:bg-neutral-900"
       />
       {error ? (
         <p role="alert" className="text-base text-red-700">

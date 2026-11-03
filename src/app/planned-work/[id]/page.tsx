@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ButtonLink } from "@/components/atoms/ButtonLink";
 import { ReadinessBadge } from "@/components/atoms/ReadinessBadge";
+import { DataFreshness } from "@/components/molecules/DataFreshness";
+import { NeedsConnection } from "@/components/molecules/NeedsConnection";
 import { ProductReadinessList } from "@/components/organisms/ProductReadinessList";
 import { ScenarioReadinessList } from "@/components/organisms/ScenarioReadinessList";
 import { SignOutButton } from "@/components/organisms/SignOutButton";
@@ -14,6 +15,7 @@ import { logger } from "@/lib/logger";
 import { getPlannedWorkDetail, type PlannedWorkDetail } from "@/lib/services/planned-work-detail";
 import { createServerSupabaseClient } from "@/lib/supabase/server-client";
 import { signOut } from "../../sign-in/actions";
+import { TextLink } from "@/components/atoms/TextLink";
 
 export const metadata: Metadata = { title: "Planned work detail — QAntum Team Leader" };
 
@@ -23,6 +25,7 @@ interface PlannedWorkDetailPageProps {
 
 export default async function PlannedWorkDetailPage({ params }: PlannedWorkDetailPageProps) {
   const user = await requireRole("team_leader");
+  const asOf = new Date().toISOString();
   let detail: PlannedWorkDetail | null = null;
   let failed = false;
   try {
@@ -43,12 +46,10 @@ export default async function PlannedWorkDetailPage({ params }: PlannedWorkDetai
       userName={user.displayName}
       actions={<SignOutButton action={signOut} />}
     >
-      <Link
-        href="/planned-work"
-        className="mb-4 inline-flex min-h-11 items-center text-base underline"
-      >
+      <TextLink href="/planned-work" className="mb-4">
         ← Back to planned work
-      </Link>
+      </TextLink>
+      {detail ? <DataFreshness asOf={asOf} /> : null}
       {detail ? (
         <div className="flex max-w-3xl flex-col gap-6">
           <section
@@ -65,17 +66,24 @@ export default async function PlannedWorkDetailPage({ params }: PlannedWorkDetai
               </p>
             ) : null}
             {detail.escalation.kind === "escalate" ? (
-              <ButtonLink href={`/planned-work/${detail.plannedWorkId}/escalate`}>
-                Escalate
-              </ButtonLink>
+              <NeedsConnection
+                label="Escalate"
+                reason="Escalating needs a connection. Reconnect to escalate."
+              >
+                <ButtonLink href={`/planned-work/${detail.plannedWorkId}/escalate`}>
+                  Escalate
+                </ButtonLink>
+              </NeedsConnection>
             ) : null}
             {detail.escalation.kind === "view" ? (
-              <ButtonLink
-                href={`/escalations/${detail.escalation.escalationId}`}
-                variant="secondary"
-              >
-                View open escalation
-              </ButtonLink>
+              <NeedsConnection label="View open escalation" reason="Escalations need a connection.">
+                <ButtonLink
+                  href={`/escalations/${detail.escalation.escalationId}`}
+                  variant="secondary"
+                >
+                  View open escalation
+                </ButtonLink>
+              </NeedsConnection>
             ) : null}
           </section>
           <section aria-labelledby="scenarios-heading" className="flex flex-col gap-3">

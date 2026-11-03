@@ -105,14 +105,15 @@ E2E tests run with the assistant disabled or stubbed, never against the real API
 
 ## 7. Offline testing
 
-| What                                                                                                 | Level                 |
-| ---------------------------------------------------------------------------------------------------- | --------------------- |
-| Snapshot written after an online render; read when offline                                           | Unit (fake IndexedDB) |
-| Stale warning after 24 hours                                                                         | Unit (fake timers)    |
-| Outbox: add, replay, retry, remove on `created` / `duplicate` / `alreadyOpen`, keep on network error | Unit                  |
-| App shell, list and detail load offline after one visit                                              | E2E                   |
-| Offline banner and disabled network actions                                                          | E2E                   |
-| Escalate offline, reconnect, exactly one escalation exists                                           | E2E                   |
+| What                                                                                                              | Level              |
+| ----------------------------------------------------------------------------------------------------------------- | ------------------ |
+| Which requests may be cached (Planned Work pages only; other private pages and RSC never)                         | Unit               |
+| Pre-loading detail pages; clearing caches on sign-in and sign-out                                                 | Unit, E2E          |
+| Stale warning after 24 hours                                                                                      | Unit (fake timers) |
+| Outbox: add, replay, retry, remove on `created` / `duplicate` / `alreadyOpen`, keep on network error              | Unit               |
+| App shell, list and detail (including details never opened) load offline after one visit; My escalations does not | E2E                |
+| Offline banner and disabled network actions                                                                       | E2E                |
+| Escalate offline, reconnect, exactly one escalation exists                                                        | E2E                |
 
 ## 8. CI
 

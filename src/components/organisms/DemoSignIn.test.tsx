@@ -24,6 +24,20 @@ describe("DemoSignIn", () => {
     expect(action).toHaveBeenCalledWith(role);
   });
 
+  it("clears pages saved for a previous user before signing in", async () => {
+    const calls: string[] = [];
+    const clearCaches = vi.fn(async () => {
+      calls.push("clear");
+    });
+    const action = vi.fn(async () => {
+      calls.push("sign in");
+      return { message: null };
+    });
+    render(<DemoSignIn action={action} clearCaches={clearCaches} />);
+    await userEvent.click(screen.getByRole("button", TEAM_LEADER));
+    expect(calls).toEqual(["clear", "sign in"]);
+  });
+
   it("shows the message the action returns", async () => {
     const action = vi.fn(async () => ({ message: "Choose a demo persona." }));
     render(<DemoSignIn action={action} />);

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 import { EscalationStateBadge } from "@/components/atoms/EscalationStateBadge";
 import { EscalationLineList } from "@/components/molecules/EscalationLineList";
@@ -6,6 +5,7 @@ import { NoteList } from "@/components/molecules/NoteList";
 import type { EscalationRecord } from "@/lib/data/escalation-repository";
 import { RESOLUTION_LABELS, describeStoredLine } from "@/lib/escalation/labels";
 import { formatDateTime, formatWorkDate } from "@/lib/format/date";
+import { TextLink } from "@/components/atoms/TextLink";
 
 interface EscalationDetailViewProps {
   escalation: EscalationRecord;
@@ -52,14 +52,7 @@ export function EscalationDetailView({
             {escalation.resolutionComment ? ` — ${escalation.resolutionComment}` : ""}
           </p>
         ) : null}
-        {plannedWorkHref ? (
-          <Link
-            href={plannedWorkHref}
-            className="inline-flex min-h-11 items-center text-base underline"
-          >
-            View the planned work
-          </Link>
-        ) : null}
+        {plannedWorkHref ? <TextLink href={plannedWorkHref}>View the planned work</TextLink> : null}
       </section>
       <section aria-labelledby="lines-heading" className="flex flex-col gap-2">
         <h2 id="lines-heading" className="text-lg font-semibold">

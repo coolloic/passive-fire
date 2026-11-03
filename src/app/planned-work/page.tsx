@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { DataFreshness } from "@/components/molecules/DataFreshness";
+import { SaveForOffline } from "@/components/organisms/SaveForOffline";
 import { SignOutButton } from "@/components/organisms/SignOutButton";
 import { PlannedWorkList } from "@/components/organisms/PlannedWorkList";
 import { AppShell } from "@/components/templates/AppShell";
@@ -13,12 +14,14 @@ import {
 } from "@/lib/services/planned-work-summaries";
 import { createServerSupabaseClient } from "@/lib/supabase/server-client";
 import { signOut } from "../sign-in/actions";
+import { TextLink } from "@/components/atoms/TextLink";
 
 export const metadata: Metadata = { title: "Planned work — QAntum Team Leader" };
 
 export default async function PlannedWorkPage() {
   const user = await requireRole("team_leader");
   const today = todayIso();
+  const asOf = new Date().toISOString();
   let summaries: PlannedWorkSummary[] | null = null;
   try {
     summaries = await getPlannedWorkSummaries(
@@ -39,12 +42,17 @@ export default async function PlannedWorkPage() {
         <p className="text-base text-neutral-600 dark:text-neutral-400">
           Your crews&apos; planned work for the next 14 days. All data is SAMPLE data.
         </p>
-        <Link href="/escalations" className="inline-flex min-h-11 items-center text-base underline">
-          My escalations
-        </Link>
+        <TextLink href="/escalations">My escalations</TextLink>
       </div>
       {summaries ? (
-        <PlannedWorkList summaries={summaries} today={today} />
+        <>
+          <DataFreshness asOf={asOf} />
+          <PlannedWorkList summaries={summaries} today={today} />
+          <SaveForOffline
+            hrefs={summaries.map((summary) => `/planned-work/${summary.plannedWorkId}`)}
+            alsoSave={["/planned-work"]}
+          />
+        </>
       ) : (
         <p
           role="alert"
