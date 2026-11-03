@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { EscalationDetailView } from "@/components/organisms/EscalationDetailView";
 import { NoteForm } from "@/components/organisms/NoteForm";
 import { SignOutButton } from "@/components/organisms/SignOutButton";
+import { TeamLeaderNav } from "@/components/organisms/TeamLeaderNav";
 import { AppShell } from "@/components/templates/AppShell";
 import { requireRole } from "@/lib/auth/session";
 import {
@@ -40,6 +41,7 @@ export default async function EscalationPage({ params }: EscalationPageProps) {
     <AppShell
       title="Escalation"
       userName={user.displayName}
+      nav={<TeamLeaderNav />}
       actions={<SignOutButton action={signOut} />}
     >
       <TextLink href="/escalations" className="mb-4">

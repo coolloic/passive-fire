@@ -4,12 +4,12 @@ import { ButtonLink } from "@/components/atoms/ButtonLink";
 import { ReadinessBadge } from "@/components/atoms/ReadinessBadge";
 import { DataFreshness } from "@/components/molecules/DataFreshness";
 import { NeedsConnection } from "@/components/molecules/NeedsConnection";
-import { AssistantPanel } from "@/components/organisms/AssistantPanel";
 import { OfflineEscalate } from "@/components/organisms/OfflineEscalate";
 import { OutboxPanel } from "@/components/organisms/OutboxPanel";
 import { ProductReadinessList } from "@/components/organisms/ProductReadinessList";
 import { ScenarioReadinessList } from "@/components/organisms/ScenarioReadinessList";
 import { SignOutButton } from "@/components/organisms/SignOutButton";
+import { TeamLeaderNav } from "@/components/organisms/TeamLeaderNav";
 import { AppShell } from "@/components/templates/AppShell";
 import { requireRole } from "@/lib/auth/session";
 import { createSupabaseReadinessDataSource } from "@/lib/data/readiness-repository";
@@ -49,6 +49,7 @@ export default async function PlannedWorkDetailPage({ params }: PlannedWorkDetai
     <AppShell
       title={detail ? `${formatWorkDate(detail.workDate)} · ${detail.crewName}` : "Planned work"}
       userName={user.displayName}
+      nav={<TeamLeaderNav />}
       actions={<SignOutButton action={signOut} />}
     >
       <TextLink href="/planned-work" className="mb-4">
@@ -56,7 +57,6 @@ export default async function PlannedWorkDetailPage({ params }: PlannedWorkDetai
       </TextLink>
       {detail ? <DataFreshness asOf={asOf} /> : null}
       <OutboxPanel userId={user.id} send={raiseEscalationAction} />
-      {detail ? <AssistantPanel /> : null}
       {detail ? (
         <div className="flex max-w-3xl flex-col gap-6">
           <section
