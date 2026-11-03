@@ -5,6 +5,12 @@ import { useId, useState } from "react";
 import { Button } from "@/components/atoms/Button";
 import { TextArea } from "@/components/atoms/TextArea";
 import { EscalationLineList } from "@/components/molecules/EscalationLineList";
+import {
+  requestDraft as defaultRequestDraft,
+  type DraftOutcome,
+} from "@/lib/assistant/draft-client";
+import { formatDateTime } from "@/lib/format/date";
+import { useOnlineStatus } from "@/hooks/use-online-status";
 import type { SendOutcome } from "@/lib/offline/sync";
 import { TextLink } from "@/components/atoms/TextLink";
 
@@ -24,6 +30,27 @@ interface EscalationFormProps {
   action: (request: RaiseEscalationRequest) => Promise<RaiseEscalationOutcome>;
   /** Injected for tests; defaults to the browser's UUID generator. */
   createId?: () => string;
+  /** Offers "Draft with AI" (online only). The draft only fills the note; nothing is sent. */
+  allowDraft?: boolean;
+  /** Injected for tests. */
+  requestDraft?: (plannedWorkId: string) => Promise<DraftOutcome>;
+}
+
+function draftProblem(outcome: Exclude<DraftOutcome, { kind: "ok" }>): string {
+  switch (outcome.kind) {
+    case "not_configured":
+      return "The assistant isn't set up on this server. Write the note yourself.";
+    case "disabled":
+      return "The assistant is switched off on this server. Write the note yourself.";
+    case "rate_limited":
+      return outcome.retryAt
+        ? `You've reached the assistant's hourly limit. Try again after ${formatDateTime(outcome.retryAt)}.`
+        : "You've reached the assistant's hourly limit. Try again later.";
+    case "no_draft":
+      return "The assistant couldn't draft this note. Write it yourself.";
+    case "error":
+      return "We couldn't get a draft. Try again or write the note yourself.";
+  }
 }
 
 /**
@@ -36,7 +63,12 @@ export function EscalationForm({
   maxNoteLength,
   action,
   createId = () => crypto.randomUUID(),
+  allowDraft = false,
+  requestDraft = defaultRequestDraft,
 }: EscalationFormProps) {
+  const online = useOnlineStatus();
+  const [drafting, setDrafting] = useState(false);
+  const [draftNotice, setDraftNotice] = useState<string | null>(null);
   const router = useRouter();
   const noteId = useId();
   const [escalationId] = useState(createId);
@@ -67,6 +99,19 @@ export function EscalationForm({
       setError("We couldn't send the escalation. Try again.");
     }
     setPending(false);
+  }
+
+  async function draft() {
+    setDrafting(true);
+    setDraftNotice(null);
+    const outcome = await requestDraft(plannedWorkId);
+    if (outcome.kind === "ok") {
+      setNote(outcome.draft);
+      setDraftNotice("Draft added. Check and edit it before sending.");
+    } else {
+      setDraftNotice(draftProblem(outcome));
+    }
+    setDrafting(false);
   }
 
   if (queued) {
@@ -107,6 +152,18 @@ export function EscalationForm({
           {note.length} / {maxNoteLength} characters
         </p>
       </div>
+      {allowDraft && online ? (
+        <div className="flex flex-col gap-1">
+          <Button variant="secondary" disabled={drafting || pending} onClick={() => void draft()}>
+            {drafting ? "Drafting…" : "Draft with AI"}
+          </Button>
+          {draftNotice ? (
+            <p role="status" className="text-sm text-neutral-700 dark:text-neutral-300">
+              {draftNotice}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
       {error ? (
         <p role="alert" className="text-base text-red-700">
           {error}
