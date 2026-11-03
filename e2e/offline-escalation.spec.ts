@@ -48,7 +48,10 @@ test("an escalation raised offline waits on the device and is sent once on recon
   await expect(waiting).toContainText("Waiting to send");
   await expect(waiting.getByRole("button", { name: "Retry now" })).toBeDisabled();
 
+  // Offline this is a full page load; reconnect only once the list has loaded.
   await page.getByRole("link", { name: "← Back to planned work" }).click();
+  await expect(page).toHaveURL(/\/planned-work$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Planned work" })).toBeVisible();
   await expect(page.getByRole("region", { name: "Waiting to send" })).toContainText(
     "Crew Alpha (SAMPLE)",
   );
