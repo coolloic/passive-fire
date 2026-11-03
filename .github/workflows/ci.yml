@@ -55,9 +55,33 @@ jobs:
           path: playwright-report/
           retention-days: 7
 
+  integration:
+    name: Integration tests (local Supabase)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Start local Supabase
+        run: pnpm db:start
+      - name: Export local Supabase connection settings
+        run: |
+          pnpm exec supabase status -o env \
+            --override-name api.url=NEXT_PUBLIC_SUPABASE_URL \
+            --override-name auth.anon_key=NEXT_PUBLIC_SUPABASE_ANON_KEY \
+            | grep -E '^NEXT_PUBLIC_SUPABASE_(URL|ANON_KEY)=' | tr -d '"' >> "$GITHUB_ENV"
+      - run: pnpm db:reset
+      - run: pnpm test:int
+      - if: always()
+        run: pnpm db:stop
+
   deploy:
     name: Deploy to Vercel
-    needs: [quality, e2e]
+    needs: [quality, e2e, integration]
     # Preview deploys for same-repo PRs, production deploys for pushes to main.
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
