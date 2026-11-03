@@ -1,17 +1,11 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
+import { checkAssistantAccess, checkAssistantAllowance, jsonResponse } from "./guard";
 import { createAssistantTools } from "./tools";
 import { MAX_HISTORY_MESSAGES, runAssistant, type RunnerFactory } from "./run";
-import { getCurrentUser } from "@/lib/auth/session";
 import { createSupabaseReadinessDataSource } from "@/lib/data/readiness-repository";
-import { createSupabaseAssistantUsageRepository } from "@/lib/data/assistant-usage-repository";
-import { getAnthropicApiKey, isAssistantEnabled } from "@/lib/env.server";
 import { formatDateTime, todayIso } from "@/lib/format/date";
 import { logger } from "@/lib/logger";
-import { createServerSupabaseClient } from "@/lib/supabase/server-client";
-
-/** Spec AC-13.1. */
-export const ASSISTANT_MESSAGES_PER_HOUR = 20;
 
 const requestSchema = z.object({
   messages: z
@@ -25,12 +19,6 @@ const requestSchema = z.object({
     .max(MAX_HISTORY_MESSAGES * 2)
     .refine((messages) => messages.at(-1)?.role === "user", "The last message must be a question."),
 });
-
-const json = (status: number, body: unknown) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
-  });
 
 /** Builds the SDK tool runner. */
 export function createRunnerFactory(apiKey: string): RunnerFactory {
@@ -46,37 +34,25 @@ export async function handleAssistantRequest(
   request: Request,
   runnerFactory: (apiKey: string) => RunnerFactory = createRunnerFactory,
 ): Promise<Response> {
-  const user = await getCurrentUser();
-  if (!user) return json(401, { error: "not_signed_in" });
-  if (user.role !== "team_leader") return json(403, { error: "forbidden" });
-
-  if (!isAssistantEnabled()) return json(503, { error: "disabled" });
-  const apiKey = getAnthropicApiKey();
-  if (!apiKey) return json(503, { error: "not_configured" });
+  const checked = await checkAssistantAccess();
+  if ("denied" in checked) return checked.denied;
+  const { access } = checked;
 
   let body: z.infer<typeof requestSchema>;
   try {
     const parsed = requestSchema.safeParse(await request.json());
-    if (!parsed.success) return json(400, { error: "invalid_request" });
+    if (!parsed.success) return jsonResponse(400, { error: "invalid_request" });
     body = parsed.data;
   } catch {
-    return json(400, { error: "invalid_request" });
+    return jsonResponse(400, { error: "invalid_request" });
   }
 
-  const client = createServerSupabaseClient();
-  try {
-    const allowance = await createSupabaseAssistantUsageRepository(client).recordMessage(
-      ASSISTANT_MESSAGES_PER_HOUR,
-    );
-    if (!allowance.allowed) return json(429, { error: "rate_limited", retryAt: allowance.retryAt });
-  } catch (error) {
-    logger.error("Could not check assistant usage", error, { userId: user.id });
-    return json(500, { error: "unavailable" });
-  }
+  const limited = await checkAssistantAllowance(access);
+  if (limited) return limited;
 
   const now = new Date();
   const context = {
-    source: createSupabaseReadinessDataSource(client),
+    source: createSupabaseReadinessDataSource(access.client),
     today: todayIso(now),
     asOf: formatDateTime(now.toISOString()),
   };
@@ -87,7 +63,7 @@ export async function handleAssistantRequest(
         controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
       try {
         const status = await runAssistant({
-          createRunner: runnerFactory(apiKey),
+          createRunner: runnerFactory(access.apiKey),
           tools: createAssistantTools(context),
           history: body.messages,
           today: context.today,
@@ -96,7 +72,7 @@ export async function handleAssistantRequest(
         });
         send({ type: "done", status });
       } catch (error) {
-        logger.error("Assistant request failed", error, { userId: user.id });
+        logger.error("Assistant request failed", error, { userId: access.user.id });
         send({ type: "error" });
       } finally {
         controller.close();
