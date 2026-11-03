@@ -21,7 +21,8 @@
     "db:status": "supabase status",
     "test:int": "vitest run --config vitest.int.config.mts",
     "db:env": "supabase status -o env --override-name api.url=NEXT_PUBLIC_SUPABASE_URL --override-name auth.anon_key=NEXT_PUBLIC_SUPABASE_ANON_KEY --override-name auth.service_role_key=SUPABASE_SERVICE_ROLE_KEY | grep -E \"^(NEXT_PUBLIC_SUPABASE_(URL|ANON_KEY)|SUPABASE_SERVICE_ROLE_KEY)=\"",
-    "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts && prettier --write src/lib/supabase/database.types.ts"
+    "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts && prettier --write src/lib/supabase/database.types.ts",
+    "db:seed:generate": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/generate-seed.ts"
   },
   "dependencies": {
     "@serwist/next": "^9.5.13",
