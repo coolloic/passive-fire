@@ -47,7 +47,19 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
+      - name: Start local Supabase
+        run: pnpm db:start
+      - name: Export local Supabase connection settings
+        run: |
+          pnpm exec supabase status -o env \
+            --override-name api.url=NEXT_PUBLIC_SUPABASE_URL \
+            --override-name auth.anon_key=NEXT_PUBLIC_SUPABASE_ANON_KEY \
+            --override-name auth.service_role_key=SUPABASE_SERVICE_ROLE_KEY \
+            | grep -E '^(NEXT_PUBLIC_SUPABASE_(URL|ANON_KEY)|SUPABASE_SERVICE_ROLE_KEY)=' | tr -d '"' >> "$GITHUB_ENV"
+      - run: pnpm db:reset
       - run: pnpm test:e2e
+      - if: always()
+        run: pnpm db:stop
       - uses: actions/upload-artifact@v4
         if: always()
         with:

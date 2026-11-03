@@ -22,7 +22,7 @@ test.describe("progressive web app", () => {
   });
 
   test("shows an offline indicator when connectivity drops", async ({ page, context }) => {
-    await page.goto("/");
+    await page.goto("/sign-in");
     await expect(page.getByRole("status")).toHaveCount(0);
 
     await context.setOffline(true);
@@ -33,7 +33,7 @@ test.describe("progressive web app", () => {
   });
 
   test("loads offline after the first visit", async ({ page, context }) => {
-    await page.goto("/");
+    await page.goto("/sign-in");
     await page.evaluate(async () => {
       await navigator.serviceWorker.ready;
     });
@@ -48,7 +48,7 @@ test.describe("progressive web app", () => {
   });
 
   test("falls back to the offline page for uncached routes", async ({ page, context }) => {
-    await page.goto("/");
+    await page.goto("/sign-in");
     await page.evaluate(async () => {
       await navigator.serviceWorker.ready;
     });
