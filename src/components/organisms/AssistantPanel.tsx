@@ -6,14 +6,25 @@ import { TextArea } from "@/components/atoms/TextArea";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { askAssistant, type AskResult } from "@/lib/assistant/client";
 import type { ChatTurn } from "@/lib/assistant/run";
+import { formatDateTime } from "@/lib/format/date";
 
 interface AssistantPanelProps {
   /** Injected for tests. */
   ask?: (history: readonly ChatTurn[], onText: (delta: string) => void) => Promise<AskResult>;
 }
 
-const MESSAGES: Record<Exclude<AskResult["kind"], "done">, string> = {
+function messageFor(result: Exclude<AskResult, { kind: "done" }>): string {
+  if (result.kind === "rate_limited") {
+    return result.retryAt
+      ? `You've reached the limit of 20 questions an hour. Try again after ${formatDateTime(result.retryAt)}.`
+      : "You've reached the limit of 20 questions an hour. Try again later.";
+  }
+  return MESSAGES[result.kind];
+}
+
+const MESSAGES: Record<Exclude<AskResult["kind"], "done" | "rate_limited">, string> = {
   not_configured: "The assistant isn't set up on this server.",
+  disabled: "The assistant is switched off on this server.",
   unavailable: "The assistant isn't available for your account.",
   error: "Something went wrong. Try again.",
 };
@@ -52,7 +63,7 @@ export function AssistantPanel({ ask = askAssistant }: AssistantPanelProps) {
         setNotice("The answer was cut short. Ask a narrower question.");
       setHistory([...conversation, { role: "assistant", content: answer || "(no answer)" }]);
     } else {
-      setNotice(MESSAGES[result.kind]);
+      setNotice(messageFor(result));
       setHistory(conversation.slice(0, -1));
       setQuestion(text);
     }

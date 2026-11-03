@@ -1,13 +1,11 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
+import { checkAssistantAccess, checkAssistantAllowance, jsonResponse } from "./guard";
 import { createAssistantTools } from "./tools";
 import { MAX_HISTORY_MESSAGES, runAssistant, type RunnerFactory } from "./run";
-import { getCurrentUser } from "@/lib/auth/session";
 import { createSupabaseReadinessDataSource } from "@/lib/data/readiness-repository";
-import { getAnthropicApiKey } from "@/lib/env.server";
 import { formatDateTime, todayIso } from "@/lib/format/date";
 import { logger } from "@/lib/logger";
-import { createServerSupabaseClient } from "@/lib/supabase/server-client";
 
 const requestSchema = z.object({
   messages: z
@@ -21,12 +19,6 @@ const requestSchema = z.object({
     .max(MAX_HISTORY_MESSAGES * 2)
     .refine((messages) => messages.at(-1)?.role === "user", "The last message must be a question."),
 });
-
-const json = (status: number, body: unknown) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
-  });
 
 /** Builds the SDK tool runner. */
 export function createRunnerFactory(apiKey: string): RunnerFactory {
@@ -42,25 +34,25 @@ export async function handleAssistantRequest(
   request: Request,
   runnerFactory: (apiKey: string) => RunnerFactory = createRunnerFactory,
 ): Promise<Response> {
-  const user = await getCurrentUser();
-  if (!user) return json(401, { error: "not_signed_in" });
-  if (user.role !== "team_leader") return json(403, { error: "forbidden" });
-
-  const apiKey = getAnthropicApiKey();
-  if (!apiKey) return json(503, { error: "not_configured" });
+  const checked = await checkAssistantAccess();
+  if ("denied" in checked) return checked.denied;
+  const { access } = checked;
 
   let body: z.infer<typeof requestSchema>;
   try {
     const parsed = requestSchema.safeParse(await request.json());
-    if (!parsed.success) return json(400, { error: "invalid_request" });
+    if (!parsed.success) return jsonResponse(400, { error: "invalid_request" });
     body = parsed.data;
   } catch {
-    return json(400, { error: "invalid_request" });
+    return jsonResponse(400, { error: "invalid_request" });
   }
+
+  const limited = await checkAssistantAllowance(access);
+  if (limited) return limited;
 
   const now = new Date();
   const context = {
-    source: createSupabaseReadinessDataSource(createServerSupabaseClient()),
+    source: createSupabaseReadinessDataSource(access.client),
     today: todayIso(now),
     asOf: formatDateTime(now.toISOString()),
   };
@@ -71,7 +63,7 @@ export async function handleAssistantRequest(
         controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
       try {
         const status = await runAssistant({
-          createRunner: runnerFactory(apiKey),
+          createRunner: runnerFactory(access.apiKey),
           tools: createAssistantTools(context),
           history: body.messages,
           today: context.today,
@@ -80,7 +72,7 @@ export async function handleAssistantRequest(
         });
         send({ type: "done", status });
       } catch (error) {
-        logger.error("Assistant request failed", error, { userId: user.id });
+        logger.error("Assistant request failed", error, { userId: access.user.id });
         send({ type: "error" });
       } finally {
         controller.close();

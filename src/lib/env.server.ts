@@ -30,3 +30,8 @@ export function getAnthropicApiKey(
   const key = raw?.trim();
   return key ? key : null;
 }
+
+/** The assistant is on unless AI_ENABLED is explicitly "false" (or "0"/"off"). */
+export function isAssistantEnabled(raw: string | undefined = process.env.AI_ENABLED): boolean {
+  return !["false", "0", "off"].includes((raw ?? "").trim().toLowerCase());
+}

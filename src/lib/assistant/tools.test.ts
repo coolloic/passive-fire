@@ -96,7 +96,16 @@ describe("assistant tool handlers", () => {
     expect(result.escalationWouldRecord).toEqual(["Short by 6 × Collar 50"]);
   });
 
-  it.each(["getReadiness", "getShortages"] as const)(
+  it("gives the facts and instructions for drafting an escalation", async () => {
+    const result = JSON.parse(await createToolHandlers(context()).draftEscalation(PW));
+    expect(result).toMatchObject({
+      crew: "Crew Alpha",
+      escalationWouldRecord: ["Short by 6 × Collar 50"],
+    });
+    expect(result.instructions).toContain("the team leader must review it and send it");
+  });
+
+  it.each(["getReadiness", "getShortages", "draftEscalation"] as const)(
     "%s reports planned work it cannot see",
     async (name) => {
       const result = JSON.parse(await createToolHandlers(context())[name]("someone-elses"));
@@ -115,12 +124,13 @@ describe("assistant tool handlers", () => {
 });
 
 describe("createAssistantTools", () => {
-  it("exposes four read-only tools that run the handlers", async () => {
+  it("exposes five read-only tools that run the handlers", async () => {
     const tools = createAssistantTools(context());
     expect(tools.map((tool) => tool.name)).toEqual([
       "list_planned_work",
       "get_readiness",
       "get_shortages",
+      "draft_escalation",
       "get_expected_deliveries",
     ]);
     // Each tool has its own input type; call them through a plain signature.
@@ -133,6 +143,9 @@ describe("createAssistantTools", () => {
     expect((await run("list_planned_work", {})).plannedWork).toHaveLength(1);
     expect((await run("get_readiness", { plannedWorkId: PW })).readiness).toBe("short");
     expect((await run("get_shortages", { plannedWorkId: PW })).products).toHaveLength(1);
+    expect(
+      (await run("draft_escalation", { plannedWorkId: PW })).escalationWouldRecord,
+    ).toHaveLength(1);
     expect((await run("get_expected_deliveries", {})).deliveries).toHaveLength(3);
   });
 });

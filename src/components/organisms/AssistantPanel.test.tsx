@@ -55,6 +55,15 @@ describe("AssistantPanel", () => {
   it.each<[AskResult, string]>([
     [{ kind: "not_configured" }, "The assistant isn't set up on this server."],
     [{ kind: "unavailable" }, "The assistant isn't available for your account."],
+    [{ kind: "disabled" }, "The assistant is switched off on this server."],
+    [
+      { kind: "rate_limited", retryAt: "2026-11-03T15:00:00Z" },
+      "You've reached the limit of 20 questions an hour. Try again after 3 Nov, 15:00.",
+    ],
+    [
+      { kind: "rate_limited", retryAt: null },
+      "You've reached the limit of 20 questions an hour. Try again later.",
+    ],
     [{ kind: "error" }, "Something went wrong. Try again."],
   ])("shows %o and keeps the question to retry", async (result, message) => {
     setOnline(true);

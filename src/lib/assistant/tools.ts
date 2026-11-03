@@ -76,6 +76,20 @@ export function createToolHandlers({ source, today, asOf }: AssistantToolContext
       });
     },
 
+    async draftEscalation(plannedWorkId: string): Promise<string> {
+      const detail = await getPlannedWorkDetail(source, plannedWorkId, today);
+      if (!detail) return NOT_FOUND;
+      return JSON.stringify({
+        asOf,
+        date: formatWorkDate(detail.workDate),
+        crew: detail.crewName,
+        site: detail.siteName,
+        escalationWouldRecord: detail.escalationLines.map((line) => line.description),
+        instructions:
+          "Write a short draft note to the project manager from these facts only. It is a draft: the team leader must review it and send it with the Escalate button.",
+      });
+    },
+
     async getExpectedDeliveries(): Promise<string> {
       const supply = await source.getSupply();
       const products = new Map(
@@ -127,6 +141,13 @@ export function createAssistantTools(context: AssistantToolContext) {
       description: "Products one planned work needs: needed, allocated and short, with notes.",
       inputSchema: plannedWorkIdInput,
       run: (input) => handlers.getShortages(input.plannedWorkId),
+    }),
+    betaZodTool({
+      name: "draft_escalation",
+      description:
+        "Facts for drafting an escalation note for one planned work. Returns a draft brief only; nothing is sent.",
+      inputSchema: plannedWorkIdInput,
+      run: (input) => handlers.draftEscalation(input.plannedWorkId),
     }),
     betaZodTool({
       name: "get_expected_deliveries",

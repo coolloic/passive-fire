@@ -3,6 +3,15 @@ import type { AssistantStatus, ChatTurn } from "./run";
 
 export const ASSISTANT_ENDPOINT = "/api/assistant";
 
+async function readJson(response: Response): Promise<Record<string, unknown> | null> {
+  try {
+    const body: unknown = await response.json();
+    return body !== null && typeof body === "object" ? (body as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
+}
+
 const eventSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("text"), text: z.string() }),
   z.object({ type: z.literal("done"), status: z.enum(["ok", "refused", "truncated"]) }),
@@ -12,6 +21,8 @@ const eventSchema = z.discriminatedUnion("type", [
 export type AskResult =
   | { kind: "done"; status: AssistantStatus }
   | { kind: "not_configured" }
+  | { kind: "disabled" }
+  | { kind: "rate_limited"; retryAt: string | null }
   | { kind: "unavailable" }
   | { kind: "error" };
 
@@ -34,7 +45,17 @@ export async function askAssistant(
   } catch {
     return { kind: "error" };
   }
-  if (response.status === 503) return { kind: "not_configured" };
+  if (response.status === 503) {
+    const body = await readJson(response);
+    return { kind: body?.error === "disabled" ? "disabled" : "not_configured" };
+  }
+  if (response.status === 429) {
+    const body = await readJson(response);
+    return {
+      kind: "rate_limited",
+      retryAt: typeof body?.retryAt === "string" ? body.retryAt : null,
+    };
+  }
   if (response.status === 401 || response.status === 403) return { kind: "unavailable" };
   if (!response.ok || !response.body) return { kind: "error" };
 

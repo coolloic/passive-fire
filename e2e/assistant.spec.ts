@@ -36,3 +36,12 @@ test("the assistant API refuses signed-out callers", async ({ playwright, baseUR
   expect(response.status()).toBe(401);
   await anonymous.dispose();
 });
+
+test("the draft API refuses signed-out callers", async ({ playwright, baseURL }) => {
+  const anonymous = await playwright.request.newContext({ baseURL });
+  const response = await anonymous.post("/api/assistant/draft", {
+    data: { plannedWorkId: "a0000000-0000-4000-8005-000000000003" },
+  });
+  expect(response.status()).toBe(401);
+  await anonymous.dispose();
+});
