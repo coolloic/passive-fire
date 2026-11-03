@@ -22,9 +22,11 @@ export function AppShell({ title, userName, actions, children }: AppShellProps) 
           {actions}
         </div>
       </header>
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:px-8">
-        <h1 className="mb-4 text-2xl font-semibold md:text-3xl">{title}</h1>
-        {children}
+      <main className="flex-1 px-4 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:px-8">
+        <div className="mx-auto w-full max-w-5xl">
+          <h1 className="mb-4 text-2xl font-semibold md:text-3xl">{title}</h1>
+          {children}
+        </div>
       </main>
     </div>
   );
