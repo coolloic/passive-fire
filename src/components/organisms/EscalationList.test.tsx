@@ -13,6 +13,7 @@ const base: EscalationSummary = {
   raisedAt: "2026-11-03T10:00:00Z",
   resolution: null,
   shortageClearedAtSync: false,
+  raisedByName: null,
 };
 
 describe("EscalationList", () => {
@@ -44,6 +45,17 @@ describe("EscalationList", () => {
     );
     expect(screen.getByRole("link")).toHaveTextContent("Resolution: Stock arriving");
     expect(screen.getByText("Shortage no longer present at sync")).toBeInTheDocument();
+  });
+
+  it("names who raised it when known", () => {
+    render(
+      <EscalationList
+        escalations={[{ ...base, raisedByName: "Sam" }]}
+        hrefFor={(id) => id}
+        emptyMessage="None"
+      />,
+    );
+    expect(screen.getByRole("link")).toHaveTextContent("raised 3 Nov, 10:00 by Sam");
   });
 
   it("shows the empty message", () => {

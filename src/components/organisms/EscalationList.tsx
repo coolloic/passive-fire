@@ -35,6 +35,7 @@ export function EscalationList({ escalations, hrefFor, emptyMessage }: Escalatio
             </div>
             <span className="text-base text-neutral-600 dark:text-neutral-400">
               {escalation.siteName} · raised {formatDateTime(escalation.raisedAt)}
+              {escalation.raisedByName ? ` by ${escalation.raisedByName}` : ""}
             </span>
             {escalation.resolution ? (
               <span className="text-base">
