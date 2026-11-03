@@ -11,6 +11,7 @@ import {
   type Outbox,
   type OutboxItem,
 } from "@/lib/offline/outbox";
+import { rememberSent, recentlySent } from "@/lib/offline/sent-notice";
 import { syncOutbox, type Send } from "@/lib/offline/sync";
 
 interface OutboxPanelProps {
@@ -31,6 +32,7 @@ export function OutboxPanel({ userId, send, store = defaultOutbox }: OutboxPanel
   const [syncing, setSyncing] = useState(false);
   const [sentCount, setSentCount] = useState(0);
   const running = useRef(false);
+  const sentTotal = useRef(0);
   // Keep the router in a ref so `sync` does not change identity on every render.
   const routerRef = useRef(router);
   routerRef.current = router;
@@ -51,7 +53,10 @@ export function OutboxPanel({ userId, send, store = defaultOutbox }: OutboxPanel
     try {
       const result = await syncOutbox(store, userId, send);
       if (result.sent > 0) {
-        setSentCount((count) => count + result.sent);
+        sentTotal.current += result.sent;
+        setSentCount(sentTotal.current);
+        // If the refresh below falls back to a full reload, the new page shows this count.
+        rememberSent(userId, sentTotal.current);
         routerRef.current.refresh();
       }
     } finally {
@@ -60,6 +65,15 @@ export function OutboxPanel({ userId, send, store = defaultOutbox }: OutboxPanel
       await load();
     }
   }, [store, userId, send, load]);
+
+  useEffect(() => {
+    // Idempotent (the count is kept until it expires), so a repeated effect cannot double it.
+    const restored = recentlySent(userId);
+    if (restored > sentTotal.current) {
+      sentTotal.current = restored;
+      setSentCount(restored);
+    }
+  }, [userId]);
 
   useEffect(() => {
     void load();

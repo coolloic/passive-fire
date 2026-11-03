@@ -1,4 +1,5 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
+import { StrictMode } from "react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { OUTBOX_CHANGED_EVENT, type Outbox, type OutboxItem } from "@/lib/offline/outbox";
@@ -46,7 +47,10 @@ function setOnline(value: boolean) {
 }
 
 describe("OutboxPanel", () => {
-  beforeEach(() => refresh.mockClear());
+  beforeEach(() => {
+    refresh.mockClear();
+    sessionStorage.clear();
+  });
   afterEach(() => vi.restoreAllMocks());
 
   it("renders nothing when the outbox is empty", async () => {
@@ -85,6 +89,42 @@ describe("OutboxPanel", () => {
     expect(send).toHaveBeenCalledWith({ id: "A", plannedWorkId: "pw-A", note: "" });
     expect(refresh).toHaveBeenCalled();
     expect(screen.queryByText("Fri 6 Nov · Crew A")).not.toBeInTheDocument();
+  });
+
+  it("keeps the sent confirmation when the page reloads after sending", async () => {
+    // A refresh right after reconnecting can fail and fall back to a full reload.
+    setOnline(true);
+    const send: Send = vi.fn(async () => ({ kind: "created" as const, escalationId: "A" }));
+    const store = memoryOutbox([item("A")]);
+    const first = render(<OutboxPanel userId="u1" send={send} store={store} />);
+    await screen.findByText("Sent 1 escalation saved on this device.");
+    first.unmount();
+
+    // It may reload more than once (each new page's refresh can fail too).
+    for (let reload = 0; reload < 2; reload += 1) {
+      const page = render(<OutboxPanel userId="u1" send={send} store={store} />);
+      expect(await screen.findByRole("status")).toHaveTextContent(
+        "Sent 1 escalation saved on this device.",
+      );
+      page.unmount();
+    }
+    expect(send).toHaveBeenCalledOnce();
+  });
+
+  it("does not double the restored count when its effect runs twice", async () => {
+    setOnline(true);
+    sessionStorage.setItem(
+      "team-leader-outbox-sent",
+      JSON.stringify({ userId: "u1", count: 1, at: Date.now() }),
+    );
+    render(
+      <StrictMode>
+        <OutboxPanel userId="u1" send={vi.fn()} store={memoryOutbox([])} />
+      </StrictMode>,
+    );
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Sent 1 escalation saved on this device.",
+    );
   });
 
   it("sends on open when online and counts several", async () => {
