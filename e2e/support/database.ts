@@ -19,3 +19,27 @@ export async function resetEscalations(): Promise<void> {
   const { error } = await adminClient().from("escalations").delete().not("id", "is", null);
   if (error) throw error;
 }
+
+/** Number of escalations stored for a planned work. */
+export async function countEscalations(plannedWorkId: string): Promise<number> {
+  const { count, error } = await adminClient()
+    .from("escalations")
+    .select("id", { count: "exact", head: true })
+    .eq("planned_work_id", plannedWorkId);
+  if (error) throw error;
+  return count ?? 0;
+}
+
+/** Creates an Open escalation behind the app's back, to simulate a clash. Returns its id. */
+export async function createOpenEscalation(
+  plannedWorkId: string,
+  raisedBy: string,
+): Promise<string> {
+  const { data, error } = await adminClient()
+    .from("escalations")
+    .insert({ planned_work_id: plannedWorkId, raised_by: raisedBy })
+    .select("id")
+    .single();
+  if (error) throw error;
+  return (data as { id: string }).id;
+}

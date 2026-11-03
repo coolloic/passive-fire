@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DataFreshness } from "@/components/molecules/DataFreshness";
+import { OutboxPanel } from "@/components/organisms/OutboxPanel";
 import { SaveForOffline } from "@/components/organisms/SaveForOffline";
 import { SignOutButton } from "@/components/organisms/SignOutButton";
 import { PlannedWorkList } from "@/components/organisms/PlannedWorkList";
@@ -13,6 +14,7 @@ import {
   type PlannedWorkSummary,
 } from "@/lib/services/planned-work-summaries";
 import { createServerSupabaseClient } from "@/lib/supabase/server-client";
+import { raiseEscalationAction } from "../escalations/actions";
 import { signOut } from "../sign-in/actions";
 import { TextLink } from "@/components/atoms/TextLink";
 
@@ -47,6 +49,7 @@ export default async function PlannedWorkPage() {
       {summaries ? (
         <>
           <DataFreshness asOf={asOf} />
+          <OutboxPanel userId={user.id} send={raiseEscalationAction} />
           <PlannedWorkList summaries={summaries} today={today} />
           <SaveForOffline
             hrefs={summaries.map((summary) => `/planned-work/${summary.plannedWorkId}`)}
