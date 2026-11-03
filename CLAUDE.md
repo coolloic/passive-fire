@@ -34,6 +34,15 @@ Guidance for Claude Code when working in this repository.
   - Hooks/Utils/Routings: kebab-case (e.g., `use-auth.ts`, `page.tsx`).
 - **File Size**: Keep components under 250 lines. Extract sub-components into a local `_components/` folder if it grows too large.
 
+### SOLID Principles
+Apply SOLID to components, hooks, stores, and services:
+- **S — Single Responsibility**: Each component, hook, or module does one thing. Separate data fetching (pages/hooks), business logic (`lib/`, services), and presentation (atoms → organisms). A component that fetches, transforms, and renders should be split.
+- **O — Open/Closed**: Extend behavior through props, variants, composition (`children`, slots), and config maps — not by editing a shared component with new `if` branches for each use case.
+- **L — Liskov Substitution**: Wrapped or extended components must honor the base contract (e.g., a custom `Button` still accepts and forwards standard `button` props, `ref`, and accessibility attributes). Implementations of a shared interface must be interchangeable without breaking callers.
+- **I — Interface Segregation**: Keep props interfaces small and focused; don't pass whole domain objects when a component needs two fields. Prefer several narrow hooks/selectors over one hook returning everything (also avoids unnecessary Zustand re-renders).
+- **D — Dependency Inversion**: Depend on abstractions, not concrete implementations. Access external services (Supabase, APIs, storage, logger) through typed interfaces in `src/lib/` (e.g., a repository or client module) so UI code never calls SDKs directly and dependencies can be mocked in tests.
+- Apply pragmatically: do not add abstractions with only one speculative use (YAGNI); refactor toward SOLID when a second use case appears.
+
 ## 4. Atomic Design
 Organize shared UI by Atomic Design levels. Each level may only import from the levels below it.
 
@@ -136,6 +145,17 @@ Before raising a PR, all of the following pass locally: `pnpm lint`, `pnpm typec
 - Do NOT read, `cat`, or echo the contents of `.env*` files unless the user explicitly asks; refer to variables by name only.
 - Production/preview secrets are managed in Vercel environment variables, not in the repo.
 - If a secret is ever committed or exposed, stop and tell the user immediately so it can be rotated; rewriting git history alone is not sufficient.
+
+### Principle of Least Privilege
+Grant every user, service, token, and tool only the minimum access required for its task — nothing more, for no longer than needed.
+- **Database (Supabase)**: Enable Row Level Security (RLS) on every table, with policies scoped to the authenticated user/role. Default deny; explicitly grant only the operations (`select`, `insert`, …) each role needs.
+- **Service role key**: Use the Supabase anon key + RLS by default. Use the service role key only in server-side code for operations that genuinely require bypassing RLS, and document why at the call site.
+- **API routes & Server Actions**: Authenticate and authorize every request on the server; never trust client-side checks or client-supplied user IDs/roles.
+- **Tokens & keys**: Create scoped, minimal-permission keys (read-only where possible, limited to a single project/environment) with expiry where supported. Use separate credentials for dev, preview, and production.
+- **Client exposure**: Send the browser only the data it needs; select explicit columns rather than `select('*')` and never return internal fields (roles, tokens, other users' data).
+- **CI/CD & GitHub**: Give workflows the minimal `permissions:` block (default `contents: read`); grant write scopes per job only when required.
+- **MCP & tooling**: Prefer read-only modes and project-scoped access for MCP servers (e.g., Supabase `read_only=true&project_ref=...`). Request elevated access from the user only for the specific action, and drop it afterward.
+- **Dependencies**: Do not add packages that require broad install scripts or permissions without justification; prefer well-maintained, minimal dependencies.
 
 ### MCP Servers
 Project-level MCP servers are defined in `.mcp.json` (committed; must never contain credentials — remote servers authenticate via OAuth).
