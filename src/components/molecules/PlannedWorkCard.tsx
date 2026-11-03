@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AppLink } from "@/components/atoms/AppLink";
 import { ReadinessBadge } from "@/components/atoms/ReadinessBadge";
 import type { ReadinessState } from "@/lib/readiness/types";
 
@@ -21,7 +21,7 @@ export function PlannedWorkCard({
   reliesOnDelivery,
 }: PlannedWorkCardProps) {
   return (
-    <Link
+    <AppLink
       href={href}
       className="flex min-h-11 flex-col gap-2 rounded-lg border border-neutral-200 p-4 hover:border-neutral-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 dark:border-neutral-700"
     >
@@ -37,6 +37,6 @@ export function PlannedWorkCard({
           Relies on delivery
         </span>
       ) : null}
-    </Link>
+    </AppLink>
   );
 }

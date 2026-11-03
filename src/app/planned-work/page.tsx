@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { DataFreshness } from "@/components/molecules/DataFreshness";
+import { SaveForOffline } from "@/components/organisms/SaveForOffline";
 import { SignOutButton } from "@/components/organisms/SignOutButton";
 import { PlannedWorkList } from "@/components/organisms/PlannedWorkList";
 import { AppShell } from "@/components/templates/AppShell";
@@ -19,6 +21,7 @@ export const metadata: Metadata = { title: "Planned work — QAntum Team Leader"
 export default async function PlannedWorkPage() {
   const user = await requireRole("team_leader");
   const today = todayIso();
+  const asOf = new Date().toISOString();
   let summaries: PlannedWorkSummary[] | null = null;
   try {
     summaries = await getPlannedWorkSummaries(
@@ -44,7 +47,14 @@ export default async function PlannedWorkPage() {
         </Link>
       </div>
       {summaries ? (
-        <PlannedWorkList summaries={summaries} today={today} />
+        <>
+          <DataFreshness asOf={asOf} />
+          <PlannedWorkList summaries={summaries} today={today} />
+          <SaveForOffline
+            hrefs={summaries.map((summary) => `/planned-work/${summary.plannedWorkId}`)}
+            alsoSave={["/planned-work"]}
+          />
+        </>
       ) : (
         <p
           role="alert"
