@@ -84,6 +84,7 @@ export interface World {
   plannedWorkA: string;
   plannedWorkB: string;
   productId: string;
+  solutionId: string;
   userIds: string[];
 }
 
@@ -165,6 +166,7 @@ export async function createWorld(): Promise<World> {
     plannedWorkA: plannedWorkA.id,
     plannedWorkB: plannedWorkB.id,
     productId: product.id,
+    solutionId: solution.id,
     userIds: [projectManager.id, leaderA.id, leaderB.id],
   };
 }
@@ -177,6 +179,8 @@ export async function destroyWorld(world: World): Promise<void> {
     .in("planned_work_id", [world.plannedWorkA, world.plannedWorkB]);
   await admin.from("crews").delete().in("team_leader_id", world.userIds);
   await admin.from("sites").delete().in("id", [world.siteA, world.siteB]);
+  await admin.from("solutions").delete().eq("id", world.solutionId);
+  await admin.from("products").delete().eq("id", world.productId);
   for (const id of world.userIds) {
     await admin.auth.admin.deleteUser(id);
   }
