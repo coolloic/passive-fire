@@ -2,9 +2,9 @@
 
 import { CalendarDays, CloudOff, Flag, MessageCircle } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 import { NavButton, NavLink, NavUnavailable } from "@/components/molecules/NavItem";
 import { useOnlineStatus } from "@/hooks/use-online-status";
+import { useAssistantStore } from "@/stores/assistant-store";
 import { AssistantPanel, type AssistantPanelProps } from "./AssistantPanel";
 
 interface TeamLeaderNavProps {
@@ -19,7 +19,8 @@ interface TeamLeaderNavProps {
 export function TeamLeaderNav({ ask }: TeamLeaderNavProps) {
   const pathname = usePathname() ?? "";
   const online = useOnlineStatus();
-  const [assistantOpen, setAssistantOpen] = useState(false);
+  const assistantOpen = useAssistantStore((state) => state.open);
+  const setAssistantOpen = useAssistantStore((state) => state.setOpen);
   const inSection = (base: string) => pathname === base || pathname.startsWith(`${base}/`);
 
   return (
@@ -61,7 +62,7 @@ export function TeamLeaderNav({ ask }: TeamLeaderNavProps) {
           </li>
         </ul>
       </nav>
-      <AssistantPanel open={assistantOpen} onClose={() => setAssistantOpen(false)} ask={ask} />
+      <AssistantPanel ask={ask} />
     </>
   );
 }
