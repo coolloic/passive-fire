@@ -18,6 +18,8 @@ function record(id: string, workDate: string, collarsPerPenetration = 1): Planne
     scenarios: [
       {
         scenarioId: "s1",
+        label: "Scenario 1",
+        solutionCode: "0798",
         penetrationCount: 5,
         nominatedSolutionId: "sol",
         requirements: [{ productId: "collar", quantityPerPenetration: collarsPerPenetration }],
