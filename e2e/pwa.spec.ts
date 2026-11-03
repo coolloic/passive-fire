@@ -21,6 +21,26 @@ test.describe("progressive web app", () => {
     );
   });
 
+  test("keeps the manifest available offline from the first visit", async ({ page, context }) => {
+    // The first page load requests the manifest before the service worker controls the page,
+    // so only precaching makes it available offline.
+    await page.goto("/sign-in");
+    await page.evaluate(async () => {
+      await navigator.serviceWorker.ready;
+    });
+    await expect
+      .poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller)))
+      .toBe(true);
+
+    await context.setOffline(true);
+    const manifest = await page.evaluate(async () => {
+      const response = await fetch("/manifest.webmanifest");
+      return { ok: response.ok, body: await response.json() };
+    });
+    expect(manifest.ok).toBe(true);
+    expect(manifest.body).toMatchObject({ short_name: "Team Leader" });
+  });
+
   test("shows an offline indicator when connectivity drops", async ({ page, context }) => {
     await page.goto("/sign-in");
     await expect(page.getByRole("status")).toHaveCount(0);
