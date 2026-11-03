@@ -655,6 +655,14 @@ export type Database = {
           retry_at: string;
         }[];
       };
+      resolve_escalation: {
+        Args: {
+          p_comment: string;
+          p_id: string;
+          p_resolution: Database["public"]["Enums"]["escalation_resolution"];
+        };
+        Returns: string;
+      };
     };
     Enums: {
       escalation_line_reason:
