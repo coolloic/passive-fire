@@ -4,10 +4,14 @@ import { createAssistantTools } from "./tools";
 import { MAX_HISTORY_MESSAGES, runAssistant, type RunnerFactory } from "./run";
 import { getCurrentUser } from "@/lib/auth/session";
 import { createSupabaseReadinessDataSource } from "@/lib/data/readiness-repository";
-import { getAnthropicApiKey } from "@/lib/env.server";
+import { createSupabaseAssistantUsageRepository } from "@/lib/data/assistant-usage-repository";
+import { getAnthropicApiKey, isAssistantEnabled } from "@/lib/env.server";
 import { formatDateTime, todayIso } from "@/lib/format/date";
 import { logger } from "@/lib/logger";
 import { createServerSupabaseClient } from "@/lib/supabase/server-client";
+
+/** Spec AC-13.1. */
+export const ASSISTANT_MESSAGES_PER_HOUR = 20;
 
 const requestSchema = z.object({
   messages: z
@@ -46,6 +50,7 @@ export async function handleAssistantRequest(
   if (!user) return json(401, { error: "not_signed_in" });
   if (user.role !== "team_leader") return json(403, { error: "forbidden" });
 
+  if (!isAssistantEnabled()) return json(503, { error: "disabled" });
   const apiKey = getAnthropicApiKey();
   if (!apiKey) return json(503, { error: "not_configured" });
 
@@ -58,9 +63,20 @@ export async function handleAssistantRequest(
     return json(400, { error: "invalid_request" });
   }
 
+  const client = createServerSupabaseClient();
+  try {
+    const allowance = await createSupabaseAssistantUsageRepository(client).recordMessage(
+      ASSISTANT_MESSAGES_PER_HOUR,
+    );
+    if (!allowance.allowed) return json(429, { error: "rate_limited", retryAt: allowance.retryAt });
+  } catch (error) {
+    logger.error("Could not check assistant usage", error, { userId: user.id });
+    return json(500, { error: "unavailable" });
+  }
+
   const now = new Date();
   const context = {
-    source: createSupabaseReadinessDataSource(createServerSupabaseClient()),
+    source: createSupabaseReadinessDataSource(client),
     today: todayIso(now),
     asOf: formatDateTime(now.toISOString()),
   };

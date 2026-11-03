@@ -3,13 +3,18 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const getCurrentUser = vi.fn();
 const getAnthropicApiKey = vi.fn();
+const isAssistantEnabled = vi.fn();
+const recordMessage = vi.fn();
 const runAssistant = vi.fn();
 const loggerError = vi.fn();
 const toolRunner = vi.fn(() => "runner");
 
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/auth/session", () => ({ getCurrentUser }));
-vi.mock("@/lib/env.server", () => ({ getAnthropicApiKey }));
+vi.mock("@/lib/env.server", () => ({ getAnthropicApiKey, isAssistantEnabled }));
+vi.mock("@/lib/data/assistant-usage-repository", () => ({
+  createSupabaseAssistantUsageRepository: () => ({ recordMessage }),
+}));
 vi.mock("@/lib/supabase/server-client", () => ({ createServerSupabaseClient: () => ({}) }));
 vi.mock("@/lib/data/readiness-repository", () => ({
   createSupabaseReadinessDataSource: () => ({}),
@@ -48,6 +53,41 @@ describe("handleAssistantRequest", () => {
     vi.clearAllMocks();
     getCurrentUser.mockResolvedValue({ id: "u1", role: "team_leader" });
     getAnthropicApiKey.mockReturnValue("key");
+    isAssistantEnabled.mockReturnValue(true);
+    recordMessage.mockResolvedValue({ allowed: true, retryAt: null });
+  });
+
+  it("reports when the assistant is switched off, before anything else", async () => {
+    isAssistantEnabled.mockReturnValue(false);
+    const response = await handleAssistantRequest(request(question));
+    expect(response.status).toBe(503);
+    expect(await response.json()).toEqual({ error: "disabled" });
+    expect(recordMessage).not.toHaveBeenCalled();
+  });
+
+  it("enforces the hourly limit of 20 messages", async () => {
+    recordMessage.mockResolvedValue({ allowed: false, retryAt: "2026-11-03T15:00:00Z" });
+    const response = await handleAssistantRequest(request(question));
+    expect(response.status).toBe(429);
+    expect(await response.json()).toEqual({
+      error: "rate_limited",
+      retryAt: "2026-11-03T15:00:00Z",
+    });
+    expect(recordMessage).toHaveBeenCalledWith(20);
+    expect(runAssistant).not.toHaveBeenCalled();
+  });
+
+  it("fails safely when usage cannot be checked", async () => {
+    recordMessage.mockRejectedValue(new Error("db"));
+    const response = await handleAssistantRequest(request(question));
+    expect(response.status).toBe(500);
+    expect(loggerError).toHaveBeenCalled();
+    expect(runAssistant).not.toHaveBeenCalled();
+  });
+
+  it("does not count invalid requests against the limit", async () => {
+    await handleAssistantRequest(request({ messages: [] }));
+    expect(recordMessage).not.toHaveBeenCalled();
   });
 
   it("refuses signed-out users and project managers", async () => {
