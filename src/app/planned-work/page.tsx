@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { SignOutButton } from "@/components/organisms/SignOutButton";
 import { PlannedWorkList } from "@/components/organisms/PlannedWorkList";
 import { AppShell } from "@/components/templates/AppShell";
@@ -34,9 +35,14 @@ export default async function PlannedWorkPage() {
       userName={user.displayName}
       actions={<SignOutButton action={signOut} />}
     >
-      <p className="mb-4 text-base text-neutral-600 dark:text-neutral-400">
-        Your crews&apos; planned work for the next 14 days. All data is SAMPLE data.
-      </p>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-base text-neutral-600 dark:text-neutral-400">
+          Your crews&apos; planned work for the next 14 days. All data is SAMPLE data.
+        </p>
+        <Link href="/escalations" className="inline-flex min-h-11 items-center text-base underline">
+          My escalations
+        </Link>
+      </div>
       {summaries ? (
         <PlannedWorkList summaries={summaries} today={today} />
       ) : (
