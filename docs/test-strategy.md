@@ -121,11 +121,11 @@ Each PR runs, in order: format check, lint, typecheck, unit tests with coverage 
 
 ## 9. Not tested, and why
 
-| Gap                             | Reason                                                                 | Mitigation                                                                |
-| ------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| Real-model answer quality in CI | Non-deterministic and costs money                                      | Manual evaluation set (§6) before release                                 |
-| Background Sync event itself    | Not reliably supported in headless browsers                            | Replay logic is unit-tested; manual check on Android Chrome               |
-| iOS Safari                      | Not available in Playwright's WebKit with full service worker fidelity | Manual check on an iPhone before release                                  |
-| Cloud Supabase and Vercel       | Deferred to the deployment milestone                                   | Same migrations; smoke test after first deploy                            |
-| Real product data accuracy      | The catalogue has no products; quantities are SAMPLE                   | Documented assumptions (spec §6); validation listed in the iteration plan |
-| Load beyond a single business   | Out of scope for slice 1                                               | R21 checks the readiness module at 1,000 planned works                    |
+| Gap                             | Reason                                                                                | Mitigation                                                                |
+| ------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Real-model answer quality in CI | Non-deterministic and costs money                                                     | Manual evaluation set (§6) before release                                 |
+| Sending while the app is closed | Background Sync is not used (Server Actions cannot be called from the service worker) | Items send on next open; E2E covers reconnect while open                  |
+| iOS Safari                      | Not available in Playwright's WebKit with full service worker fidelity                | Manual check on an iPhone before release                                  |
+| Cloud Supabase and Vercel       | Deferred to the deployment milestone                                                  | Same migrations; smoke test after first deploy                            |
+| Real product data accuracy      | The catalogue has no products; quantities are SAMPLE                                  | Documented assumptions (spec §6); validation listed in the iteration plan |
+| Load beyond a single business   | Out of scope for slice 1                                                              | R21 checks the readiness module at 1,000 planned works                    |

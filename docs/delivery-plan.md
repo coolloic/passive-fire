@@ -69,7 +69,7 @@ Read readiness offline and queue escalations.
 | Task | Issue                                                                                           | Summary                                                                                                                                                                             |
 | ---- | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 6.1  | [#20](https://github.com/coolloic/passive-fire/issues/20) `feat(offline): saved readiness data` | Keep the Planned Work pages (pre-loading 14 days of detail) for offline use via the service worker (ADR 0003), show 'Data as of', and warn when the data is more than 24 hours old. |
-| 6.2  | [#21](https://github.com/coolloic/passive-fire/issues/21) `feat(offline): queued escalations`   | Escalations raised offline are queued with IDs generated on the device and replayed when the connection returns, via Background Sync with a manual retry fallback.                  |
+| 6.2  | [#21](https://github.com/coolloic/passive-fire/issues/21) `feat(offline): queued escalations`   | Escalations raised offline are queued in IndexedDB with IDs generated on the device and sent when the app is next open and online (page open, reconnect, or Retry).                 |
 
 ### M7 AI assistant
 
