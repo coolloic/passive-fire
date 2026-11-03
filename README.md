@@ -3,7 +3,7 @@
 [![CI](https://github.com/coolloic/passive-fire/actions/workflows/ci.yml/badge.svg)](https://github.com/coolloic/passive-fire/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A mobile-first, offline-capable web app for **construction team leaders** on the QAntum passive fire compliance platform. Before going on site, a team leader checks that the materials needed for the planned fire stopping work are in stock, and escalates shortages so the business can pick an alternative solution or reschedule the work.
+A mobile-first, offline-capable web app for **construction team leaders** on the QAntum passive fire compliance platform. Before going on site, a team leader checks that the products needed for planned fire stopping work are in stock, and escalates shortages so the business can nominate a different solution or reschedule the work.
 
 > **Status:** project scaffold. The tech stack, quality gates, PWA shell and CI/CD are in place. The first feature slice has not been built yet.
 

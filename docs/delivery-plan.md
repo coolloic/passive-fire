@@ -60,7 +60,7 @@ Raise, track and resolve shortages.
 | Task | Issue                                                                                               | Summary                                                                                                                                                  |
 | ---- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 5.1  | [#18](https://github.com/coolloic/passive-fire/issues/18) `feat(escalation): raise and track`       | Escalation form pre-filled with the shortage details, plus the My Escalations list.                                                                      |
-| 5.2  | [#19](https://github.com/coolloic/passive-fire/issues/19) `feat(escalation): project manager inbox` | Project Manager inbox listing escalations, with resolution by reason: stock arriving, alternative solution being nominated, or planned work rescheduled. |
+| 5.2  | [#19](https://github.com/coolloic/passive-fire/issues/19) `feat(escalation): project manager inbox` | Project Manager inbox listing escalations, with resolution by reason: stock arriving, a different solution being nominated, or planned work rescheduled. |
 
 ### M6 Offline
 

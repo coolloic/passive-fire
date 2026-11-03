@@ -101,11 +101,11 @@ A team leader's request to a project manager to resolve a shortage. It is **Open
 _Avoid_: Ticket, request, issue
 
 **Resolution**:
-How a project manager closed an escalation: stock arriving, an alternative solution being nominated, or the planned work being rescheduled.
+How a project manager closed an escalation: stock arriving, a different solution being nominated, or the planned work being rescheduled.
 _Avoid_: Outcome, closure
 
 ## Reserved terms
 
 **Variation**:
 An installation that falls outside the nominated solution's specification. Never use it for a substitution.
-_Avoid_: Using "variation" to mean "alternative solution"
+_Avoid_: Using "variation" to mean a candidate solution
