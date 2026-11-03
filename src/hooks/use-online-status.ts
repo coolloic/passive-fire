@@ -1,0 +1,26 @@
+"use client";
+
+import { useSyncExternalStore } from "react";
+
+function subscribe(onChange: () => void): () => void {
+  window.addEventListener("online", onChange);
+  window.addEventListener("offline", onChange);
+  return () => {
+    window.removeEventListener("online", onChange);
+    window.removeEventListener("offline", onChange);
+  };
+}
+
+function getSnapshot(): boolean {
+  return navigator.onLine;
+}
+
+// Assume online during SSR; the client snapshot corrects this after hydration.
+function getServerSnapshot(): boolean {
+  return true;
+}
+
+/** Returns `true` while the browser reports a network connection. */
+export function useOnlineStatus(): boolean {
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+}
