@@ -126,12 +126,16 @@ pnpm start            # serve the production build; use this to test PWA/offline
 | `pnpm test:int`      | Integration tests against local Supabase    |
 | `pnpm test:e2e`      | Production build, then Playwright E2E tests |
 
-### Demo scenario (current scaffold)
+### Demo scenario
 
-1. Run `pnpm build && pnpm start` and open http://localhost:3000.
-2. In DevTools, go to **Application → Service Workers** and confirm `sw.js` is active.
-3. Go to **Network → Offline**. The amber "You are offline" banner appears.
-4. Reload: the home page still loads from cache. Open an unvisited URL (e.g. `/anything`) to see the offline fallback page.
+Run `pnpm db:reset` (fresh SAMPLE data, dates relative to today), then `pnpm build && pnpm start` and open http://localhost:3000.
+
+1. **Continue as Team Leader (SAMPLE).** Planned Work lists the next 14 days, each Ready, Short or Unknown.
+2. Open the planned work **3 days from today** (Short): the reasons explain that earlier planned work took the collars and the delivery arrives on the work date.
+3. **Escalate**, add a note and send. My escalations shows it as Open.
+4. **Sign out**, then **Continue as Project Manager (SAMPLE).** The inbox lists the escalation; open it, choose a resolution and resolve it.
+5. Sign back in as the team leader: My escalations shows the resolution.
+6. **Offline:** after visiting Planned Work online ("Saved 7 planned works for offline use"), switch DevTools to **Network → Offline** and reload. The list and every detail page still open, marked "You're offline", with Escalate disabled.
 
 ## Testing
 
@@ -239,19 +243,23 @@ Demo personas: **Sam Taylor (SAMPLE)**, team leader for both crews, and **Priya 
 
 ## Known Limitations
 
-- No feature slice yet. The home page is a placeholder.
-- No authentication, database schema or migrations yet. The Supabase clients exist but are not used.
+- **SAMPLE data only.** Products, quantities, stock, deliveries, sites and schedules are generated SAMPLE data; the supplied catalogue has no products. Demo personas replace real sign-in.
+- **Offline viewing caches whole pages** ([ADR 0003](docs/adr/0003-offline-viewing-by-caching-planned-work-pages.md)). The Planned Work list and the next 14 days' details work offline after one online visit; other pages need a connection. Escalations cannot yet be raised offline (task 6.2).
+- **"Today" is UTC**, to match the local database; real sites need their own time zone.
 - There is no "new version available" prompt yet. A waiting service worker activates the next time all tabs are closed.
-- Offline writes (IndexedDB queue + Background Sync) are not implemented yet.
 - The icons are placeholder artwork.
+
+### Possible enhancement: structured offline data
+
+Offline viewing could move from cached pages to an **IndexedDB snapshot** of readiness data rendered in the browser. That would make offline data queryable (search, filters) and reusable by other features, at the cost of a second, browser-side rendering path for the list and detail. See the rejected option in ADR 0003.
 
 ## Roadmap
 
-Tasks for slice 1 are tracked in [`docs/delivery-plan.md`](docs/delivery-plan.md).
+Tasks for slice 1 are tracked in [`docs/delivery-plan.md`](docs/delivery-plan.md). A possible enhancement to offline viewing (an IndexedDB snapshot) is described under [Known Limitations](#possible-enhancement-structured-offline-data).
 
 1. **Readiness check and escalation (slice 1):** show whether each planned work is Ready, Short or Unknown against stock and expected deliveries, and escalate shortages to a project manager. Includes offline viewing, escalations queued offline, and an optional read-only AI assistant.
 2. **Candidate solutions:** suggest catalogue solutions that match on service, orientation, substrate and fire rating. Each is clearly marked **"requires approval"**, because a matching catalogue field alone is not proof of compliance. A project manager approves the new nominated solution.
-3. **Stock per location and reservations:** stock held in warehouses, vans and sites, and manual reservations.
+3. **Stock per location and manual allocation:** stock held in warehouses, vans and sites, and manual allocation.
 4. **Integration:** real notifications, installations recorded in the operative app reducing stock, and the QAntum web app as the source of truth for sites and planned work.
 
 ## Contributing
