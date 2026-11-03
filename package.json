@@ -16,6 +16,7 @@
     "test:e2e": "pnpm build && playwright test",
     "prepare": "husky",
     "db:start": "supabase start",
+    "db:start:ci": "supabase start -x realtime,storage-api,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor",
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:status": "supabase status",

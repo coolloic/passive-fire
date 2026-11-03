@@ -48,7 +48,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
       - name: Start local Supabase
-        run: pnpm db:start
+        # Only the database, auth, REST API and gateway are needed; fewer containers means fewer
+        # host ports to bind (runners have failed with "address already in use") and a faster start.
+        run: pnpm db:start:ci
       - name: Export local Supabase connection settings
         run: |
           pnpm exec supabase status -o env \
@@ -79,7 +81,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Start local Supabase
-        run: pnpm db:start
+        # Only the database, auth, REST API and gateway are needed; fewer containers means fewer
+        # host ports to bind (runners have failed with "address already in use") and a faster start.
+        run: pnpm db:start:ci
       - name: Export local Supabase connection settings
         run: |
           pnpm exec supabase status -o env \
