@@ -73,6 +73,7 @@ export default async function EscalatePage({ params }: EscalatePageProps) {
                 lines={detail.escalationLines.map((line) => line.description)}
                 maxNoteLength={NOTE_MAX_LENGTH}
                 action={raiseEscalationAction}
+                allowDraft
               />
             )}
           </>

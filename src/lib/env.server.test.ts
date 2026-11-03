@@ -26,3 +26,41 @@ describe("parseServerEnv", () => {
     },
   );
 });
+
+describe("getAnthropicApiKey", () => {
+  it("returns the key, trimmed", async () => {
+    const { getAnthropicApiKey } = await import("./env.server");
+    expect(getAnthropicApiKey(" key ")).toBe("key");
+  });
+
+  it.each([undefined, "", "   "])("returns null when unset (%j)", async (raw) => {
+    const { getAnthropicApiKey } = await import("./env.server");
+    expect(getAnthropicApiKey(raw)).toBeNull();
+  });
+
+  it("reads process.env by default", async () => {
+    vi.stubEnv("ANTHROPIC_API_KEY", "from-env");
+    const { getAnthropicApiKey } = await import("./env.server");
+    expect(getAnthropicApiKey()).toBe("from-env");
+    vi.unstubAllEnvs();
+  });
+});
+
+describe("isAssistantEnabled", () => {
+  it.each([undefined, "", "true", "1", "yes"])("is on for %j", async (raw) => {
+    const { isAssistantEnabled } = await import("./env.server");
+    expect(isAssistantEnabled(raw)).toBe(true);
+  });
+
+  it.each(["false", "FALSE", " 0 ", "off"])("is off for %j", async (raw) => {
+    const { isAssistantEnabled } = await import("./env.server");
+    expect(isAssistantEnabled(raw)).toBe(false);
+  });
+
+  it("reads process.env by default", async () => {
+    vi.stubEnv("AI_ENABLED", "false");
+    const { isAssistantEnabled } = await import("./env.server");
+    expect(isAssistantEnabled()).toBe(false);
+    vi.unstubAllEnvs();
+  });
+});

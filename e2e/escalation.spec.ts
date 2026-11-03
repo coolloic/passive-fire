@@ -91,3 +91,19 @@ test("my escalations starts empty", async ({ page }) => {
   await page.getByRole("link", { name: "My escalations" }).click();
   await expect(page.getByText("You haven't raised any escalations.")).toBeVisible();
 });
+
+// E2E never calls the real model; without ANTHROPIC_API_KEY drafting explains itself and the
+// team leader writes the note.
+test("drafting without the assistant leaves the note to the team leader", async ({ page }) => {
+  await openPlannedWork(page, 3);
+  await page.getByRole("link", { name: "Escalate" }).click();
+  await page.getByRole("button", { name: "Draft with AI" }).click();
+  await expect(
+    page.getByText("The assistant isn't set up on this server. Write the note yourself."),
+  ).toBeVisible();
+
+  await page.getByLabel("Note for the project manager (optional)").fill("Need these by Thursday");
+  await page.getByRole("button", { name: "Send escalation" }).click();
+  await expect(page).toHaveURL(/\/escalations\/[0-9a-f-]{36}$/);
+  await expect(page.getByRole("region", { name: "Notes" })).toContainText("Need these by Thursday");
+});

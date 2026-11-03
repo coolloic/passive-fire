@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { DraftOutcome } from "@/lib/assistant/draft-client";
 import { EscalationForm, type RaiseEscalationOutcome } from "./EscalationForm";
 
 const push = vi.fn();
@@ -65,6 +66,16 @@ describe("EscalationForm", () => {
       ID,
       ID,
     ]);
+  });
+
+  it("confirms an escalation saved on the device for later", async () => {
+    const { send } = setup({ kind: "queued" });
+    await userEvent.click(send);
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Saved on this device. It will be sent when you're back online.",
+    );
+    expect(screen.queryByRole("button", { name: "Send escalation" })).not.toBeInTheDocument();
+    expect(push).not.toHaveBeenCalled();
   });
 
   it("links to the escalation that is already open", async () => {
@@ -133,5 +144,104 @@ describe("EscalationForm", () => {
     await userEvent.click(screen.getByRole("button", { name: "Send escalation" }));
     expect(action).toHaveBeenCalledWith(expect.objectContaining({ id: ID }));
     randomUUID.mockRestore();
+  });
+});
+
+describe("EscalationForm drafting", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  function renderWithDraft(outcome: DraftOutcome, online = true) {
+    vi.spyOn(navigator, "onLine", "get").mockReturnValue(online);
+    const requestDraft = vi.fn(async () => outcome);
+    const action = vi.fn(async (): Promise<RaiseEscalationOutcome> => ({ kind: "error" }));
+    render(
+      <EscalationForm
+        plannedWorkId={PW}
+        lines={[]}
+        maxNoteLength={1000}
+        action={action}
+        createId={() => ID}
+        allowDraft
+        requestDraft={requestDraft}
+      />,
+    );
+    return { requestDraft, action };
+  }
+
+  it("fills the note with a draft that can be edited, without sending", async () => {
+    const { requestDraft, action } = renderWithDraft({
+      kind: "ok",
+      draft: "Please send 10 collars by Thursday.",
+    });
+    await userEvent.click(screen.getByRole("button", { name: "Draft with AI" }));
+    const note = screen.getByLabelText("Note for the project manager (optional)");
+    expect(note).toHaveValue("Please send 10 collars by Thursday.");
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Draft added. Check and edit it before sending.",
+    );
+    expect(requestDraft).toHaveBeenCalledWith(PW);
+    expect(action).not.toHaveBeenCalled();
+    await userEvent.type(note, " Thanks.");
+    expect(note).toHaveValue("Please send 10 collars by Thursday. Thanks.");
+  });
+
+  it.each<[DraftOutcome, string]>([
+    [
+      { kind: "not_configured" },
+      "The assistant isn't set up on this server. Write the note yourself.",
+    ],
+    [
+      { kind: "disabled" },
+      "The assistant is switched off on this server. Write the note yourself.",
+    ],
+    [
+      { kind: "rate_limited", retryAt: "2026-11-03T15:00:00Z" },
+      "You've reached the assistant's hourly limit. Try again after 3 Nov, 15:00.",
+    ],
+    [
+      { kind: "rate_limited", retryAt: null },
+      "You've reached the assistant's hourly limit. Try again later.",
+    ],
+    [{ kind: "no_draft" }, "The assistant couldn't draft this note. Write it yourself."],
+    [{ kind: "error" }, "We couldn't get a draft. Try again or write the note yourself."],
+  ])(
+    "explains when no draft is available (%o) and keeps the form usable",
+    async (outcome, message) => {
+      renderWithDraft(outcome);
+      await userEvent.click(screen.getByRole("button", { name: "Draft with AI" }));
+      expect(screen.getByRole("status")).toHaveTextContent(message);
+      expect(screen.getByRole("button", { name: "Send escalation" })).toBeEnabled();
+    },
+  );
+
+  it("shows progress while drafting", async () => {
+    vi.spyOn(navigator, "onLine", "get").mockReturnValue(true);
+    let finish: (outcome: DraftOutcome) => void = () => {};
+    const requestDraft = vi.fn(() => new Promise<DraftOutcome>((resolve) => (finish = resolve)));
+    render(
+      <EscalationForm
+        plannedWorkId={PW}
+        lines={[]}
+        maxNoteLength={1000}
+        action={vi.fn()}
+        allowDraft
+        requestDraft={requestDraft}
+      />,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Draft with AI" }));
+    expect(screen.getByRole("button", { name: "Drafting…" })).toBeDisabled();
+    finish({ kind: "error" });
+    expect(await screen.findByRole("button", { name: "Draft with AI" })).toBeEnabled();
+  });
+
+  it("hides drafting offline and unless allowed", () => {
+    renderWithDraft({ kind: "error" }, false);
+    expect(screen.queryByRole("button", { name: "Draft with AI" })).not.toBeInTheDocument();
+  });
+
+  it("is not offered by default", () => {
+    vi.spyOn(navigator, "onLine", "get").mockReturnValue(true);
+    render(<EscalationForm plannedWorkId={PW} lines={[]} maxNoteLength={1000} action={vi.fn()} />);
+    expect(screen.queryByRole("button", { name: "Draft with AI" })).not.toBeInTheDocument();
   });
 });

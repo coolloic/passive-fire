@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { EscalationList } from "@/components/organisms/EscalationList";
+import { OutboxPanel } from "@/components/organisms/OutboxPanel";
 import { SignOutButton } from "@/components/organisms/SignOutButton";
 import { AppShell } from "@/components/templates/AppShell";
 import { requireRole } from "@/lib/auth/session";
@@ -10,6 +11,7 @@ import {
 import { logger } from "@/lib/logger";
 import { createServerSupabaseClient } from "@/lib/supabase/server-client";
 import { signOut } from "../sign-in/actions";
+import { raiseEscalationAction } from "./actions";
 import { TextLink } from "@/components/atoms/TextLink";
 
 export const metadata: Metadata = { title: "My escalations — QAntum Team Leader" };
@@ -31,6 +33,7 @@ export default async function MyEscalationsPage() {
       <TextLink href="/planned-work" className="mb-4">
         ← Back to planned work
       </TextLink>
+      <OutboxPanel userId={user.id} send={raiseEscalationAction} />
       {escalations ? (
         <EscalationList
           escalations={escalations}

@@ -4,6 +4,9 @@ import { ButtonLink } from "@/components/atoms/ButtonLink";
 import { ReadinessBadge } from "@/components/atoms/ReadinessBadge";
 import { DataFreshness } from "@/components/molecules/DataFreshness";
 import { NeedsConnection } from "@/components/molecules/NeedsConnection";
+import { AssistantPanel } from "@/components/organisms/AssistantPanel";
+import { OfflineEscalate } from "@/components/organisms/OfflineEscalate";
+import { OutboxPanel } from "@/components/organisms/OutboxPanel";
 import { ProductReadinessList } from "@/components/organisms/ProductReadinessList";
 import { ScenarioReadinessList } from "@/components/organisms/ScenarioReadinessList";
 import { SignOutButton } from "@/components/organisms/SignOutButton";
@@ -12,8 +15,10 @@ import { requireRole } from "@/lib/auth/session";
 import { createSupabaseReadinessDataSource } from "@/lib/data/readiness-repository";
 import { formatWorkDate, todayIso } from "@/lib/format/date";
 import { logger } from "@/lib/logger";
+import { NOTE_MAX_LENGTH } from "@/lib/services/escalations";
 import { getPlannedWorkDetail, type PlannedWorkDetail } from "@/lib/services/planned-work-detail";
 import { createServerSupabaseClient } from "@/lib/supabase/server-client";
+import { raiseEscalationAction } from "../../escalations/actions";
 import { signOut } from "../../sign-in/actions";
 import { TextLink } from "@/components/atoms/TextLink";
 
@@ -50,6 +55,8 @@ export default async function PlannedWorkDetailPage({ params }: PlannedWorkDetai
         ← Back to planned work
       </TextLink>
       {detail ? <DataFreshness asOf={asOf} /> : null}
+      <OutboxPanel userId={user.id} send={raiseEscalationAction} />
+      {detail ? <AssistantPanel /> : null}
       {detail ? (
         <div className="flex max-w-3xl flex-col gap-6">
           <section
@@ -66,14 +73,17 @@ export default async function PlannedWorkDetailPage({ params }: PlannedWorkDetai
               </p>
             ) : null}
             {detail.escalation.kind === "escalate" ? (
-              <NeedsConnection
-                label="Escalate"
-                reason="Escalating needs a connection. Reconnect to escalate."
+              <OfflineEscalate
+                plannedWorkId={detail.plannedWorkId}
+                label={`${formatWorkDate(detail.workDate)} · ${detail.crewName}`}
+                lines={detail.escalationLines.map((line) => line.description)}
+                userId={user.id}
+                maxNoteLength={NOTE_MAX_LENGTH}
               >
                 <ButtonLink href={`/planned-work/${detail.plannedWorkId}/escalate`}>
                   Escalate
                 </ButtonLink>
-              </NeedsConnection>
+              </OfflineEscalate>
             ) : null}
             {detail.escalation.kind === "view" ? (
               <NeedsConnection label="View open escalation" reason="Escalations need a connection.">

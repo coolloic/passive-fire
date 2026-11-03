@@ -102,11 +102,13 @@ pnpm db:env           # prints the local Supabase URL and keys for .env.local
 
 Paste the values `pnpm db:env` prints into `.env.local`. This file is git-ignored; never commit it.
 
-| Variable                        | Exposed to browser | Description                                    |
-| ------------------------------- | ------------------ | ---------------------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`      | Yes                | Supabase project URL                           |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes                | Supabase anon key (data access is RLS-guarded) |
-| `SUPABASE_SERVICE_ROLE_KEY`     | **No**             | Server-only; reserved for RLS-bypassing jobs   |
+| Variable                        | Exposed to browser | Description                                              |
+| ------------------------------- | ------------------ | -------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Yes                | Supabase project URL                                     |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes                | Supabase anon key (data access is RLS-guarded)           |
+| `SUPABASE_SERVICE_ROLE_KEY`     | **No**             | Server-only; used by tests and passwordless demo sign-in |
+| `ANTHROPIC_API_KEY`             | **No**             | Optional; enables the read-only AI assistant             |
+| `AI_ENABLED`                    | **No**             | Set to `false` to switch the assistant off               |
 
 ## Usage
 
@@ -135,7 +137,7 @@ Run `pnpm db:reset` (fresh SAMPLE data, dates relative to today), then `pnpm bui
 3. **Escalate**, add a note and send. My escalations shows it as Open.
 4. **Sign out**, then **Continue as Project Manager (SAMPLE).** The inbox lists the escalation; open it, choose a resolution and resolve it.
 5. Sign back in as the team leader: My escalations shows the resolution.
-6. **Offline:** after visiting Planned Work online ("Saved 7 planned works for offline use"), switch DevTools to **Network → Offline** and reload. The list and every detail page still open, marked "You're offline", with Escalate disabled.
+6. **Offline:** after visiting Planned Work online ("Saved 7 planned works for offline use"), switch DevTools to **Network → Offline** and reload. The list and every detail page still open, marked "You're offline". **Escalate offline** saves an escalation on the device; switch back online and it is sent automatically.
 
 ## Testing
 
@@ -244,7 +246,8 @@ Demo personas: **Sam Taylor (SAMPLE)**, team leader for both crews, and **Priya 
 ## Known Limitations
 
 - **SAMPLE data only.** Products, quantities, stock, deliveries, sites and schedules are generated SAMPLE data; the supplied catalogue has no products. Demo personas replace real sign-in.
-- **Offline viewing caches whole pages** ([ADR 0003](docs/adr/0003-offline-viewing-by-caching-planned-work-pages.md)). The Planned Work list and the next 14 days' details work offline after one online visit; other pages need a connection. Escalations cannot yet be raised offline (task 6.2).
+- **Offline viewing caches whole pages** ([ADR 0003](docs/adr/0003-offline-viewing-by-caching-planned-work-pages.md)). The Planned Work list and the next 14 days' details work offline after one online visit; other pages need a connection. Escalations raised offline wait on the device and are sent the next time the app is open and online; there is no background sending while the app is closed.
+- **The AI assistant is optional and has not been evaluated against the real model in this repository.** Without `ANTHROPIC_API_KEY` it says it is not set up; automated tests use a stubbed model. A manual evaluation with real questions is still needed before relying on its answers.
 - **"Today" is UTC**, to match the local database; real sites need their own time zone.
 - There is no "new version available" prompt yet. A waiting service worker activates the next time all tabs are closed.
 - The icons are placeholder artwork.

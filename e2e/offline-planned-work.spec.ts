@@ -1,25 +1,13 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { addDays, relativeDayLabel, todayIso } from "../src/lib/format/date";
 import { resetEscalations } from "./support/database";
+import { signInWithServiceWorker } from "./support/session";
 
 test.describe.configure({ mode: "serial" });
 
 const today = todayIso();
 const day = (offset: number) => relativeDayLabel(addDays(today, offset), today);
 const OFFLINE_CACHE = "team-leader-offline-pages";
-
-async function signInWithServiceWorker(page: Page) {
-  await page.goto("/sign-in");
-  await page.evaluate(async () => {
-    await navigator.serviceWorker.ready;
-  });
-  await page.getByRole("button", { name: "Continue as Team Leader (SAMPLE)" }).click();
-  await expect(page).toHaveURL(/\/planned-work$/);
-  // Make sure this page is controlled by the service worker, then let it save the details.
-  if (!(await page.evaluate(() => Boolean(navigator.serviceWorker.controller))))
-    await page.reload();
-  await expect(page.getByText("Saved 7 planned works for offline use")).toBeVisible();
-}
 
 test.beforeEach(async ({ context }) => {
   await resetEscalations();
@@ -50,10 +38,10 @@ test("planned work stays readable offline, including details never opened", asyn
   await expect(page.getByRole("region", { name: "Scenarios" })).toContainText(
     "No solution nominated for this scenario",
   );
-  const escalate = page.getByRole("button", { name: "Escalate" });
-  await expect(escalate).toBeDisabled();
+  // Escalating offline saves it on the device (offline-escalation.spec.ts covers sending it).
+  await expect(page.getByRole("button", { name: "Escalate offline" })).toBeEnabled();
   await expect(
-    page.getByText("Escalating needs a connection. Reconnect to escalate."),
+    page.getByText("It will be saved on this device and sent when you're back online."),
   ).toBeVisible();
 });
 
