@@ -9,11 +9,14 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
     include: ["src/**/*.test.{ts,tsx}"],
+    // Integration tests need local Supabase; they run via `pnpm test:int`.
+    exclude: ["src/**/*.int.test.ts", "node_modules/**"],
     coverage: {
       provider: "v8",
       include: ["src/**/*.{ts,tsx}"],
       exclude: [
         "src/**/*.test.{ts,tsx}",
+        "src/**/*.int.test.ts",
         "src/app/**/{layout,page,manifest}.tsx",
         "src/app/manifest.ts",
         "src/app/sw.ts",

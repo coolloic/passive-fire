@@ -72,7 +72,7 @@ This matches QAntum's existing stack (React, Node.js, Next.js, Supabase, Vercel)
 
 - Node.js **22+** (see [`.nvmrc`](.nvmrc); run `nvm use`)
 - [pnpm](https://pnpm.io/) **12+**. This project uses pnpm only; do not use npm or yarn.
-- A Supabase project (optional until the first data-backed feature lands)
+- [Docker](https://www.docker.com/) running locally (Docker Desktop or compatible), for the local Supabase stack
 
 ### Installation
 
@@ -82,13 +82,25 @@ cd passive-fire
 pnpm install          # also installs the Husky git hooks
 ```
 
+### Local Supabase
+
+Supabase (Postgres, Auth and the REST API) runs locally in Docker through the pinned Supabase CLI. No cloud project is needed.
+
+```bash
+pnpm db:start         # first run pulls Docker images and takes a few minutes
+pnpm db:reset         # apply migrations in supabase/migrations and load supabase/seed.sql
+pnpm db:status        # show local URLs (Studio: http://localhost:54323)
+pnpm db:stop          # stop the containers
+```
+
 ### Environment variables
 
 ```bash
 cp .env.example .env.local
+pnpm db:env           # prints the local NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY
 ```
 
-Then fill in the values in `.env.local`. This file is git-ignored; never commit it.
+Paste the two values `pnpm db:env` prints into `.env.local`. This file is git-ignored; never commit it.
 
 | Variable                        | Exposed to browser | Description                                    |
 | ------------------------------- | ------------------ | ---------------------------------------------- |
@@ -111,6 +123,7 @@ pnpm start            # serve the production build; use this to test PWA/offline
 | `pnpm typecheck`     | `tsc --noEmit`                              |
 | `pnpm test`          | Unit tests (`test:watch` for watch mode)    |
 | `pnpm test:coverage` | Unit tests with the 90% coverage threshold  |
+| `pnpm test:int`      | Integration tests against local Supabase    |
 | `pnpm test:e2e`      | Production build, then Playwright E2E tests |
 
 ### Demo scenario (current scaffold)
@@ -123,6 +136,7 @@ pnpm start            # serve the production build; use this to test PWA/offline
 ## Testing
 
 - **Unit tests** sit next to their source as `*.test.ts(x)`. Network calls are mocked with MSW (`src/test/msw/`). Unhandled requests fail the test.
+- **Integration tests** are `*.int.test.ts` files, run with `pnpm test:int` against local Supabase (`pnpm db:start` first). They check the database and its access rules for real.
 - **E2E tests** live in `e2e/*.spec.ts`. They run against a production build on port 3100, on both a mobile (Pixel 7) and a desktop viewport. The suite covers the app shell, layout overflow, the manifest, the offline indicator, offline reload and the offline fallback.
 - First run only: install the browser with `pnpm exec playwright install chromium`.
 - To test against an already running or deployed server, set `PLAYWRIGHT_BASE_URL`.
@@ -143,6 +157,7 @@ pnpm test:e2e
 ├── e2e/                       # Playwright specs
 ├── public/icons/              # PWA icons (placeholder artwork)
 ├── GLOSSARY.md                # Domain language
+├── supabase/                  # Local stack config, migrations, seed
 └── src/
     ├── app/                   # Routes, layout, manifest.ts, sw.ts, offline page
     ├── components/            # Atomic Design
