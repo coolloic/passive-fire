@@ -55,7 +55,7 @@ The assignment is approached as a software engineering exercise: convert the bus
 
 It also includes responsive screenshots (online and offline), a delivery summary of what was done by the human and by the AI agent, and the known gaps.
 
-- **View it:** [read-only Excalidraw link](https://excalidraw.com/#json=cTa7c9XWQ5uksL811b40M,z01XArrUocZibZivHormiA) (a snapshot; the summary is at the top)
+- **View it:** [read-only Excalidraw link](https://excalidraw.com/#json=gcm9TECfiFF5ae-czLjPM,WglCdeJmIQu8PUKqmvEing) (a snapshot; the summary is at the top)
 - **Edit it:** [`docs/diagrams/ba-analysis.excalidraw`](docs/diagrams/ba-analysis.excalidraw). Open [excalidraw.com](https://excalidraw.com), then **Menu → Open** and choose the file.
 
 Service and platform boundaries (QAntum platform, supplier catalogue, stock, this new capability) are based on the brief and the supplied CSV, and may not match the real platform.
@@ -315,7 +315,8 @@ Demo personas: **Sam Taylor (SAMPLE)**, team leader for both crews, and **Priya 
 - **"Today" is UTC**, to match the local database; real sites need their own time zone.
 - There is no "new version available" prompt yet. A waiting service worker activates the next time all tabs are closed.
 - The icons are placeholder artwork.
-
+- **A resolution does not change readiness yet.** Resolving as stock arriving, a different solution nominated or rescheduled only records the decision. No delivery, nomination or new date is created, so the planned work stays Short, and the planned work page does not show the resolution (it does show in My escalations). The next step is to show the resolution on the planned work. Later, resolutions should record the delivery, the approved nomination or the new date so readiness recalculates (iteration 2).
+- **No live updates.** A page left open does not refresh itself when someone else changes the data. A reload always shows the current state. In-app navigation can show a page cached up to 30 seconds earlier until the router cache fix in #62 is merged. Live updates would need Supabase Realtime or polling.
 - **Scope.** Dedicated UX/UI design and most non-functional requirements were not part of this slice. Service and platform boundaries are based on the brief and the supplied CSV, and may not match the real QAntum platform.
 
 ### Gaps before production
