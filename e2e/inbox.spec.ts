@@ -12,6 +12,9 @@ async function signInAs(page: Page, persona: "Team Leader" | "Project Manager") 
   await page.getByRole("button", { name: `Continue as ${persona} (SAMPLE)` }).click();
 }
 
+const nav = (page: Page, name: string) =>
+  page.getByRole("navigation", { name: "Main" }).getByRole("link", { name });
+
 async function signOut(page: Page) {
   await page.getByRole("button", { name: "Sign out" }).click();
   await expect(page).toHaveURL(/\/sign-in$/);
@@ -81,6 +84,53 @@ test("team leader raises, project manager resolves, team leader sees the resolut
   const mine = page.getByRole("link").filter({ hasText: "Crew Alpha (SAMPLE)" });
   await expect(mine).toContainText("Resolved");
   await expect(mine).toContainText("Resolution: Stock arriving");
+});
+
+// AC-8.4 regression: the team leader stays signed in on their own device while the project
+// manager resolves elsewhere. In-app navigation must show the new state at once, not a page the
+// client router cached before the resolution.
+test("a team leader who stays signed in sees the resolution on the next in-app navigation", async ({
+  page,
+  browser,
+}) => {
+  await signInAs(page, "Team Leader");
+  await page
+    .getByRole("region", { name: day(3) })
+    .getByRole("link")
+    .click();
+  await page.getByRole("link", { name: "Escalate" }).click();
+  await page.getByRole("button", { name: "Send escalation" }).click();
+  await expect(page).toHaveURL(/\/escalations\/[0-9a-f-]{36}$/);
+  const escalationPath = new URL(page.url()).pathname;
+
+  // Visit both pages so the client router has them cached as Open.
+  await nav(page, "My escalations").click();
+  await expect(page).toHaveURL(/\/escalations$/);
+  const mine = page
+    .getByRole("main")
+    .locator("a[href^='/escalations/']")
+    .filter({ hasText: "Crew Alpha (SAMPLE)" });
+  await expect(mine).toContainText("Open");
+  await mine.click();
+  await expect(page.getByRole("region", { name: "Summary" })).toContainText("Open");
+
+  const manager = await (await browser.newContext()).newPage();
+  await signInAs(manager, "Project Manager");
+  await expect(manager).toHaveURL(/\/inbox$/);
+  await manager.goto(escalationPath.replace("/escalations/", "/inbox/"));
+  await manager.getByRole("radio", { name: "Planned work rescheduled" }).check();
+  await manager.getByRole("button", { name: "Resolve escalation" }).click();
+  await expect(manager.getByRole("region", { name: "Summary" })).toContainText("Resolved");
+  await manager.context().close();
+
+  // Back on the team leader's device, without reloading.
+  await nav(page, "Planned work").click();
+  await expect(page).toHaveURL(/\/planned-work$/);
+  await nav(page, "My escalations").click();
+  await expect(mine).toContainText("Resolved");
+  await expect(mine).toContainText("Resolution: Planned work rescheduled");
+  await mine.click();
+  await expect(page.getByRole("region", { name: "Summary" })).toContainText("Resolved");
 });
 
 test("a team leader cannot open the project manager's escalation page", async ({ page }) => {

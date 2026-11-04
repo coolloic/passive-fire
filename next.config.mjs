@@ -22,6 +22,13 @@ const withSerwist = withSerwistInit({
 const nextConfig = {
   reactStrictMode: true,
   headers: securityHeaderRoutes,
+  experimental: {
+    // Readiness and escalation pages change on other people's devices (a project manager
+    // resolving, another crew taking stock). Next 14 reuses a visited dynamic page on in-app
+    // navigation for 30 s by default, which showed a resolved escalation as Open (AC-8.4).
+    // Always fetch the current page instead. Offline viewing uses the service worker, not this.
+    staleTimes: { dynamic: 0 },
+  },
 };
 
 export default withSerwist(nextConfig);
